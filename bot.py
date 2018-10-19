@@ -46,7 +46,7 @@ def helpMessage():
     help += prefix+'table\nDisplay the current Premier League Table.\n'
     help += prefix+'europa\nDisplay the Europa League table.\n'
     help += prefix+'wengerfact\nGet a random fact about our lord and savior Arsene Wenger.\n'
-    help += prefix+'unaifact\nGet a random fact about our lord and savior Arsene Wenger.\n'
+    help += prefix+'unaifact\nGet a random fact about our manager Unai Emery.\n'
     help += prefix+'fixtures\nDisplay the next 3 fixtures.\n'
     help += prefix+'wengyboi <#>\nMake a wengyboi of # length! Max 10.\n'
     help += '```'
@@ -116,7 +116,7 @@ async def on_message(message):
         body = findMatches.discordFixtures()
         await bot.send_message(message.channel,'```'+body+'```')
     if message.content.lower().startswith(prefix+'results'):
-        body = findMatches.discordResult()
+        body = findMatches.discordResults()
         await bot.send_message(message.channel,'```'+body+'```')
     if '💥' in message.content.lower():
         await bot.send_message(message.channel,"💥"+"<:xhaka:341950939902509056><:laca:341950939055259650>")
@@ -124,7 +124,7 @@ async def on_message(message):
         await bot.add_reaction(message,'❤')
         await bot.add_reaction(message,'ozgasm:332570750290755586')
     if 'brexit' in message.content.lower():
-        await bot.add_reaction(message,'brexit:469287060847591424')
+        await bot.add_reaction(message,'brexit:476534538269622272')
     if '<:feelsarsenalman:339379360983416833>' in message.content.lower():
         await bot.add_reaction(message, 'feelsarsenalman:339379360983416833')
     if '<:feelsinvincibleman:375919858845483008>' in message.content.lower():
