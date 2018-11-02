@@ -32,8 +32,8 @@ def getTimestamp():
         return dt + t
 
 def getLocation(line):
-    homeTeam = line[0]
-    if homeTeam == 'Arsenal':
+    homeTeam = line[0].text.strip()
+    if 'Arsenal' in homeTeam:
         return 0
     else:
         return 1

@@ -107,11 +107,17 @@ async def on_message(message):
     if 'tottenham' in message.content.lower():
         await bot.add_reaction(message,'\U0001F4A9')
     if message.content.lower().startswith(prefix+'wengerfact'):
-        fact = wengerFact()
-        await bot.send_message(message.channel,fact)
+        if str(message.channel) == 'unaifacts':
+            await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+message.channel)
+        else:
+            fact = wengerFact()
+            await bot.send_message(message.channel,fact)
     if message.content.lower().startswith(prefix+'unaifact'):
-        fact = unaiFact()
-        await bot.send_message(message.channel,fact)
+        if str(message.channel) == 'unaifacts':
+            await bot.send_message(message.author,"Please don't use "+prefix+"unaifact in this "+message.channel)
+        else:
+            fact = unaiFact()
+            await bot.send_message(message.channel,fact)
     if message.content.lower().startswith(prefix+'fixture'):
         body = findMatches.discordFixtures()
         await bot.send_message(message.channel,'```'+body+'```')
