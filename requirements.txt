@@ -1,2 +1,4 @@
 discord
 praw
+bs4
+lxml
