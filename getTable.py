@@ -30,14 +30,14 @@ def discordAbove(table, index, i):
         position = re.findall('<td class="pos">(.*)</td>',table[1])[0]
         goalDiff = re.findall('<td class="gd">(.*)</td>',table[1])[0]
         points = re.findall('<td class="pts">(.*)</td>',table[1])[0]
-        body += "|"+position+"|"+team+"|"+getSign(goalDiff)+"|"+points+"|\n"
+        body += "| "+position+" |"+team+"|"+getSign(goalDiff)+"|"+points+"|\n"
     else:
         for x in range(index, i):
             team = re.findall('a href=".*">(.*)<\/a>',table[x])[0]
             position = re.findall('<td class="pos">(.*)</td>',table[x])[0]
             goalDiff = re.findall('<td class="gd">(.*)</td>',table[x])[0]
             points = re.findall('<td class="pts">(.*)</td>',table[x])[0]
-            body += "|"+position+"|"+team+"|"+getSign(goalDiff)+"|"+points+"|\n"
+            body += "| "+position+" |"+team+"|"+getSign(goalDiff)+"|"+points+"|\n"
     return body
         
 
@@ -50,10 +50,11 @@ def discordBelow(table, index,i):
             position = re.findall('<td class="pos">(.*)</td>',table[x])[0]
             goalDiff = re.findall('<td class="gd">(.*)</td>',table[x])[0]
             points = re.findall('<td class="pts">(.*)</td>',table[x])[0]
-            body += "|"+position+"|"+team+"|"+getSign(goalDiff)+"|"+points+"|\n"
+            body += "| "+position+" |"+team+"|"+getSign(goalDiff)+"|"+points+"|\n"
     return body
 
 def findArsenal(table):
+    header = "| Pos |  Team  | GD | Pts |\n"
     for index,pos in enumerate(table):
         team = re.findall('a href=".*">(.*)<\/a>',pos)[0]
         if team == "Arsenal":
@@ -61,15 +62,16 @@ def findArsenal(table):
             position = re.findall('<td class="pos">(.*)</td>',pos)[0]
             goalDiff = re.findall('<td class="gd">(.*)</td>',pos)[0]
             points = re.findall('<td class="pts">(.*)</td>',pos)[0]
-            body = "|"+position+"|"+team.upper()+"|"+getSign(goalDiff)+"|"+points+"|\n"
+            body = "| "+position+" |"+team.upper()+"|"+getSign(goalDiff)+"|"+points+"|\n"
     topRange = i + 2
     botRange = i - 2
     if botRange <= 1:
         topRange += 1
     above = discordAbove(table, botRange, i)
     below = discordBelow(table, topRange, i)
-    body = above + body + below
+    body = header + above + body + below
     return body
+
 
 
 def parseWebsite():
