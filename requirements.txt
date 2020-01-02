@@ -2,3 +2,5 @@ discord
 praw
 bs4
 lxml
+google-api-python-client
+oauth2client

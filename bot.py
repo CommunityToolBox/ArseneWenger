@@ -5,7 +5,9 @@ from random import randint
 import findMatches
 import getTable
 import europaTable
+#import schedule
 from time import sleep
+from discord.utils import get
 
 prefix = '!'
 bot = discord.Client()
@@ -40,13 +42,25 @@ def unaiFact():
     except:    
         print(getTimestamp()+"errors reading facts file")
 
+def artetaFact():
+    try:
+        facts = 'artetaFacts.txt'
+        with open(facts,'r') as f:
+            content = f.readlines()
+        fact = random.choice(content)
+        return fact
+        #return random.choice(content)
+    except:    
+        print(getTimestamp()+"errors reading facts file")
+
 def helpMessage():
     help = '```\n'
     help += prefix+'help\nDisplay this message.\n'
     help += prefix+'table\nDisplay the current Premier League Table.\n'
     help += prefix+'europa\nDisplay the Europa League table.\n'
     help += prefix+'wengerfact\nGet a random fact about our lord and savior Arsene Wenger.\n'
-    help += prefix+'unaifact\nGet a random fact about our manager Unai Emery.\n'
+    help += prefix+'unaifact\nGet a random fact about our former manager Unai Emery.\n'
+    help += prefix+'artetafact\nGet a random fact about our manager Unai Emery.\n'
     help += prefix+'fixtures\nDisplay the next 3 fixtures.\n'
     help += prefix+'wengyboi <#>\nMake a wengyboi of # length! Max 10.\n'
     help += '```'
@@ -83,7 +97,7 @@ def wengerSucks():
 @bot.event
 async def on_ready():
     #set playing status
-    await bot.change_presence(game=discord.Game(name='Wengerball'))
+    await bot.change_presence(activity=discord.Game(name='Wengerball'))
     print('Logged on as')
     print(bot.user.name)
     print('----')
@@ -95,68 +109,77 @@ async def on_message(message):
         return
     if message.content.lower().startswith(prefix+'help'):
         em = discord.Embed(title='Arsene Wenger Help Message',description=helpMessage())
-        await bot.send_message(message.channel,embed=em)
+        await message.channel.send(embed=em)
     if message.content.lower().startswith(prefix+'table'):
         body = getTable.discordMain()
-        await bot.send_message(message.channel, '```' + body + '```')
+        await message.channel.send( '```' + body + '```')
     if message.content.lower().startswith(prefix+'europa'):
         body = europaTable.main()
-        await bot.send_message(message.channel, '```' + body + '```')
+        await message.channel.send( '```' + body + '```')
     if message.content.lower().startswith(prefix+'ping'):
-        await bot.send_message(message.channel, 'pong')
+        await message.channel.send('pong')
     if 'tottenham' in message.content.lower():
-        await bot.add_reaction(message,'\U0001F4A9')
+        await message.add_reaction('\U0001F4A9')
     if 'spurs' in message.content.lower():
-        await bot.add_reaction(message,'\U0001F4A9')
+        await message.add_reaction('\U0001F4A9')
     if 'spuds' in message.content.lower():
-        await bot.add_reaction(message,'\U0001F4A9')
+        await message.add_reaction('\U0001F4A9')
     if 'mustafi' in message.content.lower():
-        await bot.add_reaction(message,'🔙')
-        await bot.add_reaction(message,'🔛')
-        await bot.add_reaction(message,'🔝')
+        await message.add_reaction('🔙')
+        await message.add_reaction('🔛')
+        await message.add_reaction('🔝')
     if message.content.lower().startswith(prefix+'wengerfact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+str(message.channel))
         else:
             fact = wengerFact()
-            await bot.send_message(message.channel,fact)
+            await message.channel.send(fact)
     if message.content.lower().startswith(prefix+'unaifact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"unaifact in this channel: "+str(message.channel))
         else:
             fact = unaiFact()
-            await bot.send_message(message.channel,fact)
+            await message.channel.send(fact)
+    if message.content.lower().startswith(prefix+'artetafact'):
+        if str(message.channel) == 'unaifacts':
+            await bot.send_message(message.author,"Please don't use "+prefix+"artetafact in "+str(message.channel))
+        else:
+            fact = artetaFact()
+            await message.channel.send(fact)
     if message.content.lower().startswith(prefix+'fixture'):
         body = findMatches.discordFixtures()
-        await bot.send_message(message.channel,'```'+body+'```')
+        await message.channel.send('```'+body+'```')
     if message.content.lower().startswith(prefix+'results'):
         body = findMatches.discordResults()
-        await bot.send_message(message.channel,'```'+body+'```')
+        await message.channel.send('```'+body+'```')
+    #if message.content.lower().startswith(prefix+'time'):
+        #body = schedule.main()
+        #await message.channel.send(body)
     if '💥' in message.content.lower():
-        await bot.send_message(message.channel,"💥"+"<:xhak:531803960680513536><:laca:531803959028088833>")
+        await message.channel.send("💥"+"<:xhak:531803960680513536><:laca:531803959028088833>")
     if '<:ornstein:346679834501709824>' in message.content.lower():
-        await bot.add_reaction(message,'❤')
-        await bot.add_reaction(message,'ozgasm:332570750290755586')
+        await message.add_reaction('❤')
+        await message.add_reaction('ozgasm:332570750290755586')
     if 'brexit' in message.content.lower():
-        await bot.add_reaction(message,'brexit:521984465132847104')
+        await message.add_reaction('brexit:521984465132847104')
     if '<:feelsarsenalman:522208659443417099>' in message.content.lower():
-        await bot.add_reaction(message, 'feelsarsenalman:522208659443417099')
+        await message.add_reaction( 'feelsarsenalman:522208659443417099')
     if '<:feelsinvincibleman:375919858845483008>' in message.content.lower():
-        await bot.add_reaction(message, ':feelsinvincibleman:375919858845483008')
+        await message.add_reaction( ':feelsinvincibleman:375919858845483008')
     if '<:nelson:346679834090668034>' in message.content.lower():
-        await bot.add_reaction(message,'Bossielny:346679834535264257')
+        await message.add_reaction('Bossielny:346679834535264257')
     if message.content.lower().startswith(prefix+'wengyboi'):
         body = makeWenger(message.content)
-        await bot.send_message(message.channel,body)
+        await message.channel.send(body)
     if message.content.lower().startswith(prefix+'copy'):
         send = copyPasta()
-        await bot.send_message(message.channel,send)
+        await message.channel.send(send)
     if message.content.lower().startswith(prefix+'wengersucks'):
         body = wengerSucks()
         print(body)
-        await bot.send_message(message.channel,body)
+        await message.channel.send(body)
     if 'sanchez' in message.content.lower():
-        await bot.add_reaction(message, 'rekt:406186499802136597')
+        await message.add_reaction( 'rekt:406186499802136597')
     if message.content.lower().startswith(prefix+'clear'):
         if message.author.id == '193393269068136448':
            # clearMessages(message)
