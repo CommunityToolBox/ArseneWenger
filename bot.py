@@ -128,6 +128,8 @@ async def on_message(message):
         await message.add_reaction('🔙')
         await message.add_reaction('🔛')
         await message.add_reaction('🔝')
+    if 'craig' in message.content.lower():
+        await message.add_reaction('<:fuckcraig:658343402425024552>')
     if message.content.lower().startswith(prefix+'wengerfact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+str(message.channel))
@@ -155,8 +157,8 @@ async def on_message(message):
     #if message.content.lower().startswith(prefix+'time'):
         #body = schedule.main()
         #await message.channel.send(body)
-    if '💥' in message.content.lower():
-        await message.channel.send("💥"+"<:xhak:531803960680513536><:laca:531803959028088833>")
+    #if '💥' in message.content.lower():
+    #    await message.channel.send("💥"+"<:xhaak:531803960680513536><:laca:531803959028088833>")
     if '<:ornstein:346679834501709824>' in message.content.lower():
         await message.add_reaction('❤')
         await message.add_reaction('ozgasm:332570750290755586')
