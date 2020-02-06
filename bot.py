@@ -128,8 +128,8 @@ async def on_message(message):
         await message.add_reaction('🔙')
         await message.add_reaction('🔛')
         await message.add_reaction('🔝')
-    if 'craig' in message.content.lower():
-        await message.add_reaction('<:fuckcraig:658343402425024552>')
+    #if 'craig' in message.content.lower():
+    #    await message.add_reaction('<:fuckcraig:658343402425024552>')
     if message.content.lower().startswith(prefix+'wengerfact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+str(message.channel))
