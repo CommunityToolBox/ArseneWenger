@@ -2,7 +2,7 @@
 
 Welcome to the best bot named after a former Arsenal manager that lives in the /r/gunners Discord channel
 
-# Commands
+## Commands
 
 This bot works with many different commands. At any point you can issue !help to get them listed.
 
@@ -24,3 +24,7 @@ Display the next 3 fixtures.
 !wengyboi <#>
 Make a wengyboi of # length! Max 10.
 ```
+
+### Suggestions
+
+If you have any features you would like to suggest or need any support, please don't hesitate to open an issue!
