@@ -12,6 +12,9 @@ from discord.utils import get
 prefix = '!'
 bot = discord.Client()
 
+wengerFacts = []
+unaiFacts = []
+artetaFacts = []
 
 def getTimestamp():
     dt = str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + ' '
@@ -20,38 +23,26 @@ def getTimestamp():
     t = '[' + hr + ':' + min + '] '
     return dt + t
 
-def wengerFact():
-    try:
-        facts = 'wengerFacts.txt'
-        with open(facts,'r') as f:
-            content = f.readlines()
-        fact = random.choice(content)
-        return fact
-        #return random.choice(content)
-    except:    
-        print(getTimestamp()+"errors reading facts file")
 
-def unaiFact():
+def loadFact(fileName):
     try:
-        facts = 'unaiFacts.txt'
-        with open(facts,'r') as f:
-            content = f.readlines()
-        fact = random.choice(content)
-        return fact
-        #return random.choice(content)
-    except:    
-        print(getTimestamp()+"errors reading facts file")
+        file = fileName
+        with open(file,'r') as f:
+            return f.readlines()
+    except:
+        print(getTimestamp()+"errors loading facts file")
 
-def artetaFact():
+def fetchRandomFact(type):
     try:
-        facts = 'artetaFacts.txt'
-        with open(facts,'r') as f:
-            content = f.readlines()
-        fact = random.choice(content)
-        return fact
-        #return random.choice(content)
-    except:    
-        print(getTimestamp()+"errors reading facts file")
+        if type.lower() == 'wenger':
+            return random.choice(wengerFacts)
+        if type.lower() == 'unai':
+            return random.choice(unaiFacts)
+        if type.lower() == 'arteta':
+            return random.choice(artetaFacts)
+    except:
+        print(getTimestamp()+"errors fetching fact")
+
 
 def helpMessage():
     help = '```\n'
@@ -102,6 +93,10 @@ async def on_ready():
     print(bot.user.name)
     print('----')
 
+    wengerFacts = loadFact('wengerFacts.txt')
+    unaiFacts = loadFact('unaiFacts.txt')
+    artetaFacts = loadFact('artetaFacts.txt')
+
 
 @bot.event
 async def on_message(message):
@@ -136,19 +131,22 @@ async def on_message(message):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+str(message.channel))
         else:
-            fact = wengerFact()
+            #fact = wengerFact()
+            fact = fetchRandomFact('wenger')
             await message.channel.send(fact)
     if message.startswith(prefix+'unaifact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"unaifact in this channel: "+str(message.channel))
         else:
-            fact = unaiFact()
+            #fact = unaiFact()
+            fact = fetchRandomFact('unai')
             await message.channel.send(fact)
     if message.startswith(prefix+'artetafact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"artetafact in "+str(message.channel))
         else:
-            fact = artetaFact()
+            #fact = artetaFact()
+            fact = fetchRandomFact('unai')
             await message.channel.send(fact)
     if message.startswith(prefix+'fixture'):
         body = findMatches.discordFixtures()
