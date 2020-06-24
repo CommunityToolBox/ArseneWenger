@@ -12,9 +12,6 @@ from discord.utils import get
 prefix = '!'
 bot = discord.Client()
 
-wengerFacts = []
-unaiFacts = []
-artetaFacts = []
 
 def getTimestamp():
     dt = str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + ' '
@@ -23,26 +20,38 @@ def getTimestamp():
     t = '[' + hr + ':' + min + '] '
     return dt + t
 
-
-def loadFact(fileName):
+def wengerFact():
     try:
-        file = fileName
-        with open(file,'r') as f:
-            return f.readlines()
-    except:
-        print(getTimestamp()+"errors loading facts file")
+        facts = 'wengerFacts.txt'
+        with open(facts,'r') as f:
+            content = f.readlines()
+        fact = random.choice(content)
+        return fact
+        #return random.choice(content)
+    except:    
+        print(getTimestamp()+"errors reading facts file")
 
-def fetchRandomFact(type):
+def unaiFact():
     try:
-        if type.lower() == 'wenger':
-            return random.choice(wengerFacts)
-        if type.lower() == 'unai':
-            return random.choice(unaiFacts)
-        if type.lower() == 'arteta':
-            return random.choice(artetaFacts)
-    except:
-        print(getTimestamp()+"errors fetching fact")
+        facts = 'unaiFacts.txt'
+        with open(facts,'r') as f:
+            content = f.readlines()
+        fact = random.choice(content)
+        return fact
+        #return random.choice(content)
+    except:    
+        print(getTimestamp()+"errors reading facts file")
 
+def artetaFact():
+    try:
+        facts = 'artetaFacts.txt'
+        with open(facts,'r') as f:
+            content = f.readlines()
+        fact = random.choice(content)
+        return fact
+        #return random.choice(content)
+    except:    
+        print(getTimestamp()+"errors reading facts file")
 
 def helpMessage():
     help = '```\n'
@@ -93,108 +102,96 @@ async def on_ready():
     print(bot.user.name)
     print('----')
 
-    wengerFacts = loadFact('wengerFacts.txt')
-    unaiFacts = loadFact('unaiFacts.txt')
-    artetaFacts = loadFact('artetaFacts.txt')
-
 
 @bot.event
 async def on_message(message):
-    message = message.content.lower()
-
     if message.author == bot.user:
         return
-    if message.startswith(prefix+'help'):
+    if message.content.lower().startswith(prefix+'help'):
         em = discord.Embed(title='Arsene Wenger Help Message',description=helpMessage())
         await message.channel.send(embed=em)
-    if message.startswith(prefix+'table'):
+    if message.content.lower().startswith(prefix+'table'):
         body = getTable.discordMain()
         await message.channel.send( '```' + body + '```')
-    if message.startswith(prefix+'europa'):
+    if message.content.lower().startswith(prefix+'europa'):
         body = europaTable.main()
         await message.channel.send( '```' + body + '```')
-    if message.startswith(prefix+'ping'):
+    if message.content.lower().startswith(prefix+'ping'):
         await message.channel.send('pong')
-    if 'tottenham' in message:
+    if 'tottenham' in message.content.lower():
         await message.add_reaction('\U0001F4A9')
-    if 'spurs' in message:
+    if 'spurs' in message.content.lower():
         await message.add_reaction('\U0001F4A9')
-    if 'spuds' in message:
+    if 'spuds' in message.content.lower():
         await message.add_reaction('\U0001F4A9')
-    if 'mustafi' in message:
+    if 'mustafi' in message.content.lower():
         await message.add_reaction('🔙')
         await message.add_reaction('🔛')
         await message.add_reaction('🔝')
-    #if 'craig' in message:
+    #if 'craig' in message.content.lower():
     #    await message.add_reaction('<:fuckcraig:658343402425024552>')
-    if message.startswith(prefix+'wengerfact'):
+    if message.content.lower().startswith(prefix+'wengerfact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+str(message.channel))
         else:
-            #fact = wengerFact()
-            fact = fetchRandomFact('wenger')
+            fact = wengerFact()
             await message.channel.send(fact)
-    if message.startswith(prefix+'unaifact'):
+    if message.content.lower().startswith(prefix+'unaifact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"unaifact in this channel: "+str(message.channel))
         else:
-            #fact = unaiFact()
-            fact = fetchRandomFact('unai')
+            fact = unaiFact()
             await message.channel.send(fact)
-    if message.startswith(prefix+'artetafact'):
+    if message.content.lower().startswith(prefix+'artetafact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"artetafact in "+str(message.channel))
         else:
-            #fact = artetaFact()
-            fact = fetchRandomFact('unai')
+            fact = artetaFact()
             await message.channel.send(fact)
-    if message.startswith(prefix+'fixture'):
+    if message.content.lower().startswith(prefix+'fixture'):
         body = findMatches.discordFixtures()
         await message.channel.send('```'+body+'```')
-    if message.startswith(prefix+'results'):
+    if message.content.lower().startswith(prefix+'results'):
         body = findMatches.discordResults()
         await message.channel.send('```'+body+'```')
-    #if message.startswith(prefix+'time'):
+    #if message.content.lower().startswith(prefix+'time'):
         #body = schedule.main()
         #await message.channel.send(body)
-    #if '💥' in message:
+    #if '💥' in message.content.lower():
     #    await message.channel.send("💥"+"<:xhaak:531803960680513536><:laca:531803959028088833>")
-    if '<:ornstein:346679834501709824>' in message:
+    if '<:ornstein:346679834501709824>' in message.content.lower():
         await message.add_reaction('❤')
         await message.add_reaction('ozgasm:332570750290755586')
-    if 'brexit' in message:
+    if 'brexit' in message.content.lower():
         await message.add_reaction('brexit:521984465132847104')
-    if '<:feelsarsenalman:522208659443417099>' in message:
+    if '<:feelsarsenalman:522208659443417099>' in message.content.lower():
         await message.add_reaction( 'feelsarsenalman:522208659443417099')
-    if '<:feelsinvincibleman:375919858845483008>' in message:
+    if '<:feelsinvincibleman:375919858845483008>' in message.content.lower():
         await message.add_reaction( ':feelsinvincibleman:375919858845483008')
-    if '<:nelson:346679834090668034>' in message:
+    if '<:nelson:346679834090668034>' in message.content.lower():
         await message.add_reaction('Bossielny:346679834535264257')
-    if message.startswith(prefix+'wengyboi'):
+    if message.content.lower().startswith(prefix+'wengyboi'):
         body = makeWenger(message.content)
         await message.channel.send(body)
-    if message.startswith(prefix+'copy'):
+    if message.content.lower().startswith(prefix+'copy'):
         send = copyPasta()
         await message.channel.send(send)
-    if message.startswith(prefix+'wengersucks'):
+    if message.content.lower().startswith(prefix+'wengersucks'):
         body = wengerSucks()
         print(body)
         await message.channel.send(body)
-    if 'sanchez' in message:
+    if 'sanchez' in message.content.lower():
         await message.add_reaction( 'rekt:406186499802136597')
-    if 'zrafc' in message:
-        await bot.delete_message(message)
-    if message.startswith(prefix+'clear'):
+    if message.content.lower().startswith(prefix+'clear'):
         if message.author.id == '193393269068136448':
            # clearMessages(message)
             numMsg = int(message.content.split(' ')[1])
             msg = []
             async for x in bot.logs_from(message.channel, limit=numMsg):
-                msg.append(x)
+                msg.append(x)        
             await bot.delete_messages(msg)
         else:
             await bot.delete_message(message)
-
 
 
 try:
