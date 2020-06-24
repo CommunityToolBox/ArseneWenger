@@ -100,91 +100,88 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    message = message.content.lower()
+    msgLower = message.content.lower()
 
     if message.author == bot.user:
         return
-    if message.startswith(prefix+'help'):
+    if msgLower.startswith(prefix+'help'):
         em = discord.Embed(title='Arsene Wenger Help Message',description=helpMessage())
         await message.channel.send(embed=em)
-    if message.startswith(prefix+'table'):
+    if msgLower.startswith(prefix+'table'):
         body = getTable.discordMain()
         await message.channel.send( '```' + body + '```')
-    if message.startswith(prefix+'europa'):
+    if msgLower.startswith(prefix+'europa'):
         body = europaTable.main()
         await message.channel.send( '```' + body + '```')
-    if message.startswith(prefix+'ping'):
+    if msgLower.startswith(prefix+'ping'):
         await message.channel.send('pong')
-    if 'tottenham' in message:
+    if 'tottenham' in msgLower:
         await message.add_reaction('\U0001F4A9')
-    if 'spurs' in message:
+    if 'spurs' in msgLower:
         await message.add_reaction('\U0001F4A9')
-    if 'spuds' in message:
+    if 'spuds' in msgLower:
         await message.add_reaction('\U0001F4A9')
-    if 'mustafi' in message:
+    if 'mustafi' in msgLower:
         await message.add_reaction('🔙')
         await message.add_reaction('🔛')
         await message.add_reaction('🔝')
-    #if 'craig' in message:
+    #if 'craig' in msgLower:
     #    await message.add_reaction('<:fuckcraig:658343402425024552>')
-    if message.startswith(prefix+'wengerfact'):
+    if msgLower.startswith(prefix+'wengerfact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+str(message.channel))
         else:
-            #fact = wengerFact()
             fact = fetchRandomFact('wenger')
             await message.channel.send(fact)
-    if message.startswith(prefix+'unaifact'):
+    if msgLower.startswith(prefix+'unaifact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"unaifact in this channel: "+str(message.channel))
         else:
-            #fact = unaiFact()
             fact = fetchRandomFact('unai')
             await message.channel.send(fact)
-    if message.startswith(prefix+'artetafact'):
+    if msgLower.startswith(prefix+'artetafact'):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"artetafact in "+str(message.channel))
         else:
-            #fact = artetaFact()
             fact = fetchRandomFact('unai')
             await message.channel.send(fact)
-    if message.startswith(prefix+'fixture'):
+    if msgLower.startswith(prefix+'fixture'):
         body = findMatches.discordFixtures()
         await message.channel.send('```'+body+'```')
-    if message.startswith(prefix+'results'):
+    if msgLower.startswith(prefix+'results'):
         body = findMatches.discordResults()
         await message.channel.send('```'+body+'```')
-    #if message.startswith(prefix+'time'):
+    #if msgLower.startswith(prefix+'time'):
         #body = schedule.main()
         #await message.channel.send(body)
-    #if '💥' in message:
+    #if '💥' in msgLower:
     #    await message.channel.send("💥"+"<:xhaak:531803960680513536><:laca:531803959028088833>")
-    if '<:ornstein:346679834501709824>' in message:
+    if '<:ornstein:346679834501709824>' in msgLower:
         await message.add_reaction('❤')
         await message.add_reaction('ozgasm:332570750290755586')
-    if 'brexit' in message:
+    if 'brexit' in msgLower:
         await message.add_reaction('brexit:521984465132847104')
-    if '<:feelsarsenalman:522208659443417099>' in message:
+    if '<:feelsarsenalman:522208659443417099>' in msgLower:
         await message.add_reaction( 'feelsarsenalman:522208659443417099')
-    if '<:feelsinvincibleman:375919858845483008>' in message:
+    if '<:feelsinvincibleman:375919858845483008>' in msgLower:
         await message.add_reaction( ':feelsinvincibleman:375919858845483008')
-    if '<:nelson:346679834090668034>' in message:
+    if '<:nelson:346679834090668034>' in msgLower:
         await message.add_reaction('Bossielny:346679834535264257')
-    if message.startswith(prefix+'wengyboi'):
+    if msgLower.startswith(prefix+'wengyboi'):
         body = makeWenger(message.content)
         await message.channel.send(body)
-    if message.startswith(prefix+'copy'):
+    if msgLower.startswith(prefix+'copy'):
         send = copyPasta()
         await message.channel.send(send)
-    if message.startswith(prefix+'wengersucks'):
+    if msgLower.startswith(prefix+'wengersucks'):
         body = wengerSucks()
         print(body)
         await message.channel.send(body)
-    if 'sanchez' in message:
+    if 'sanchez' in msgLower:
         await message.add_reaction( 'rekt:406186499802136597')
-    if 'zrafc' in message:
+    if 'zrafc' in msgLower:
         await bot.delete_message(message)
-    if message.startswith(prefix+'clear'):
+    if msgLower.startswith(prefix+'clear'):
         if message.author.id == '193393269068136448':
            # clearMessages(message)
             numMsg = int(message.content.split(' ')[1])
