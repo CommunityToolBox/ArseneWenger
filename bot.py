@@ -20,6 +20,15 @@ def getTimestamp():
     t = '[' + hr + ':' + min + '] '
     return dt + t
 
+def fetchRandomFact(manager):
+    if manager == 'wenger':
+        return wengerFact()
+    if manager == 'unai':
+        return unaiFact()
+    if manager == 'arteta':
+        return artetaFact()
+    else:
+        return "Sorry, that manager doesn't exist."
 def wengerFact():
     try:
         facts = 'wengerFacts.txt'
@@ -76,6 +85,11 @@ def makeWenger(message):
     body += '<:ArseneBot:522209598464196608>\n'
     return body
 
+def bannedThings():
+    with open('banned.txt', 'r') as f:
+        banned = f.read().splitlines()
+    return banned
+
 def clearMessage(message):
     return 
 
@@ -89,7 +103,7 @@ def copyPasta():
     return body
 
 def wengerSucks():
-    wenger = '/root/discord/arseneWenger/wengerSucks.txt'
+    wenger = 'wengerSucks.txt'
     with open(wenger,'r') as f:
         content = f.readlines()
     return content
@@ -106,6 +120,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     msgLower = message.content.lower()
+    banned = bannedThings()
 
     if message.author == bot.user:
         return
@@ -148,7 +163,7 @@ async def on_message(message):
         if str(message.channel) == 'unaifacts':
             await bot.send_message(message.author,"Please don't use "+prefix+"artetafact in "+str(message.channel))
         else:
-            fact = fetchRandomFact('unai')
+            fact = fetchRandomFact('arteta')
             await message.channel.send(fact)
     if msgLower.startswith(prefix+'fixture'):
         body = findMatches.discordFixtures()
@@ -180,12 +195,10 @@ async def on_message(message):
         await message.channel.send(send)
     if msgLower.startswith(prefix+'wengersucks'):
         body = wengerSucks()
-        print(body)
         await message.channel.send(body)
     if 'sanchez' in msgLower:
         await message.add_reaction( 'rekt:406186499802136597')
-    if 'twitter.com/zrafc' in msgLower:
-        #await bot.delete_message(message)
+    if msgLower in banned:
         await message.delete()
         await message.channel.send("Sorry "+ str(message.author) +" that source is not allowed.")
     if msgLower.startswith(prefix+'clear'):
