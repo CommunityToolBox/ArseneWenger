@@ -184,7 +184,7 @@ async def on_message(message):
         await message.channel.send(body)
     if 'sanchez' in msgLower:
         await message.add_reaction( 'rekt:406186499802136597')
-    if 'zrafc' in msgLower:
+    if 'twitter.com/zrafc' in msgLower:
         #await bot.delete_message(message)
         await message.delete()
         await message.channel.send("Sorry "+ str(message.author) +" that source is not allowed.")
