@@ -185,7 +185,9 @@ async def on_message(message):
     if 'sanchez' in msgLower:
         await message.add_reaction( 'rekt:406186499802136597')
     if 'zrafc' in msgLower:
-        await bot.delete_message(message)
+        #await bot.delete_message(message)
+        await message.delete()
+        await message.channel.send("Sorry "+ str(message.author) +" that source is not allowed.")
     if msgLower.startswith(prefix+'clear'):
         if message.author.id == '193393269068136448':
            # clearMessages(message)
