@@ -88,6 +88,7 @@ def makeWenger(message):
 def bannedThings():
     with open('banned.txt', 'r') as f:
         banned = f.read().splitlines()
+    print(banned)
     return banned
 
 def clearMessage(message):
@@ -198,7 +199,7 @@ async def on_message(message):
         await message.channel.send(body)
     if 'sanchez' in msgLower:
         await message.add_reaction( 'rekt:406186499802136597')
-    if msgLower in banned:
+    if any(ele in msgLower for ele in banned):
         await message.delete()
         await message.channel.send("Sorry "+ str(message.author) +" that source is not allowed.")
     if msgLower.startswith(prefix+'clear'):
