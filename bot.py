@@ -88,7 +88,6 @@ def makeWenger(message):
 def bannedThings():
     with open('banned.txt', 'r') as f:
         banned = f.read().splitlines()
-    print(banned)
     return banned
 
 def clearMessage(message):
@@ -219,6 +218,7 @@ try:
     token = f.readline()
     f.close()
     bot.run(token.rstrip())
-except:
+except Exception as e:
     print (getTimestamp() +"setup error\n")
+    print(e)
     sleep(5)
