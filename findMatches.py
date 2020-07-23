@@ -75,7 +75,10 @@ def findFixtures(matches):
     else:
         team = homeTeam + " (A)"
     body += "| " + date + " | " + time + " | " + team +" | " +comp+" |\n"
-    for i in range(1,3):
+    x = 3
+    if len(matches) < 3:
+        x = len(matches)
+    for i in range(1,x):
         match = matches[i].find("div",{"class","card__content"})
         try:
             date = matches[i].find("time").text
