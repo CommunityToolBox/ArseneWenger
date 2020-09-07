@@ -103,7 +103,12 @@ def findResults(matches):
     body = ""
     for i in range(2,0,-1):
         result = ""
-        match = matches[i].find("div",{"class","card__content"})
+        try:
+            match = matches[i].find("div",{"class","card__content"})
+        except:
+            if i == 0:
+                return body
+            break
         date = matches[i].find("time").text
         date = date.split('-')[0][3:].strip()
         comp = matches[i].find("div",{"class","event-info__extra"}).text
