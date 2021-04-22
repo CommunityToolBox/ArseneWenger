@@ -91,4 +91,4 @@ async def on_message(message):
         await message.channel.send("Our last 5 games with this club:")
         await message.channel.send(last5utd)
 
-client.run("ODM0NDEyMTE4MTkwNDU2ODYz.YIAg1w.kLM6L8MZtBmcCrnJYdZ3PEujmFM")
+client.run("token")
