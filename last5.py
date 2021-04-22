@@ -43,4 +43,4 @@ async def on_message(message):
     elif message.content.startswith('!history mancity'):
         await message.channel.send("Our last 5 games with this club:")
         await message.channel.send(mcy.last5)
-client.run("ODM0NDEyMTE4MTkwNDU2ODYz.YIAg1w.FTJokAcky5IhgHOszQhUsxjCERY")
+client.run("token")
