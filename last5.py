@@ -15,14 +15,10 @@ class GameCheck:
             for game in games:
                 allgames.append(game.text)
             self.last5 = allgames[-5:]
-        
+      
 oqr = GameCheck("Leicester City/")
 utd = GameCheck("Manchester United/")
 mcy = GameCheck("Manchester City/")
-
-@client.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
 
 @client.event
 async def on_message(message):
