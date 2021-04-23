@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import lxml
 client = discord.Client()
-class gamecheck:
+class GameCheck:
     def __init__(self, name):
         if name == "leicester":
             source = requests.get("https://www.11v11.com/teams/arsenal/tab/opposingTeams/opposition/Leicester%20City/")
@@ -22,9 +22,9 @@ class gamecheck:
             allgames.append(game.text)
         self.last5 = allgames[-5:]
         
-oqr = gamecheck("leicester")
-utd = gamecheck("manutd")
-mcy = gamecheck("mancity")
+oqr = GameCheck("leicester")
+utd = CameCheck("manutd")
+mcy = GameCheck("mancity")
 
 @client.event
 async def on_ready():
