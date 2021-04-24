@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 import lxml
 client = discord.Client()
-bob =123
+
 class GameCheck:
     def __init__(self, name):
             source = requests.get(f"https://www.11v11.com/teams/arsenal/tab/opposingTeams/opposition/{name}")
