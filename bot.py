@@ -1,5 +1,7 @@
 import discord
-import datetime,sys,re
+import datetime
+import sys
+import re
 import random
 from random import randint
 import findMatches
@@ -14,11 +16,15 @@ bot = discord.Client()
 
 
 def getTimestamp():
-    dt = str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + ' '
-    hr = str(datetime.datetime.now().hour) if len(str(datetime.datetime.now().hour)) > 1 else '0' + str(datetime.datetime.now().hour)
-    min = str(datetime.datetime.now().minute) if len(str(datetime.datetime.now().minute)) > 1 else '0' + str(datetime.datetime.now().minute)
+    dt = str(datetime.datetime.now().month) + '/' + \
+        str(datetime.datetime.now().day) + ' '
+    hr = str(datetime.datetime.now().hour) if len(str(
+        datetime.datetime.now().hour)) > 1 else '0' + str(datetime.datetime.now().hour)
+    min = str(datetime.datetime.now().minute) if len(str(
+        datetime.datetime.now().minute)) > 1 else '0' + str(datetime.datetime.now().minute)
     t = '[' + hr + ':' + min + '] '
     return dt + t
+
 
 def fetchRandomFact(manager):
     if manager == 'wenger':
@@ -29,38 +35,43 @@ def fetchRandomFact(manager):
         return artetaFact()
     else:
         return "Sorry, that manager doesn't exist."
+
+
 def wengerFact():
     try:
         facts = 'wengerFacts.txt'
-        with open(facts,'r') as f:
+        with open(facts, 'r') as f:
             content = f.readlines()
         fact = random.choice(content)
         return fact
-        #return random.choice(content)
-    except:    
+        # return random.choice(content)
+    except:
         print(getTimestamp()+"errors reading facts file")
+
 
 def unaiFact():
     try:
         facts = 'unaiFacts.txt'
-        with open(facts,'r') as f:
+        with open(facts, 'r') as f:
             content = f.readlines()
         fact = random.choice(content)
         return fact
-        #return random.choice(content)
-    except:    
+        # return random.choice(content)
+    except:
         print(getTimestamp()+"errors reading facts file")
+
 
 def artetaFact():
     try:
         facts = 'artetaFacts.txt'
-        with open(facts,'r') as f:
+        with open(facts, 'r') as f:
             content = f.readlines()
         fact = random.choice(content)
         return fact
-        #return random.choice(content)
-    except:    
+        # return random.choice(content)
+    except:
         print(getTimestamp()+"errors reading facts file")
+
 
 def helpMessage():
     help = '```\n'
@@ -75,26 +86,30 @@ def helpMessage():
     help += '```'
     return help
 
+
 def makeWenger(message):
     message = message.split(' ')[1]
     if int(message) > 10:
         message = 10
     body = '<:ArseneTop:522209469547937802>\n'
-    for i in range(0,int(message)):
+    for i in range(0, int(message)):
         body += '<:ArseneMid:522209585403265045>\n'
     body += '<:ArseneBot:522209598464196608>\n'
     return body
+
 
 def bannedThings():
     with open('banned.txt', 'r') as f:
         banned = f.read().splitlines()
     return banned
 
+
 def clearMessage(message):
-    return 
+    return
+
 
 def copyPasta():
-    num = randint(0,1)
+    num = randint(0, 1)
     body = ""
     if num == 0:
         body = 'Right now I\'m sitting outside of the Tony Adams Statue and I am still as <:moh:358216187752087552> passionate <:moh:358216187752087552> about this club as I was the first time my uncle <:ArseneTop:346679833020989440>  took me to a game in 1991. I\'m reading the engravings on the paving outside the stadium and it fills me with <:tr7:239057992928985089>  pride. Through the ups  <:ozgasm:332570750290755586> and the downs <:wut:344131531108909056> we are fucking<:Arsenal:239341895845675008> <:Arsenal:239341895845675008> <:Arsenal:239341895845675008> <:Arsenal:239341895845675008> <:Arsenal:239341895845675008> . No matter what \"faction\" <:thethinker:337164686849998849> you may fall under we are Arsenal. If you are more concerned with <:kappa:339386429392027648> WengerOut memes or <:gaffer:344131531096457216> AKB and arguing on the internet then go find another team to support. <:laca:341950939055259650> <:laca:341950939055259650> I\'m reading the testimony of generations of people who supported this club wholeheartedly <:thierry:344131530676764682>, through good and bad. <:Arsenal:239341895845675008> <:Arsenal:239341895845675008> We are Arsenal. <:Arsenal:239341895845675008> <:Arsenal:239341895845675008> Never forget that <:gaffer:344131531096457216>'
@@ -102,15 +117,17 @@ def copyPasta():
         body = "To be fair, you have to have a very high IQ to understand Arsenal football. The tactics are extremely subtle, and without a solid grasp of the 3-4-2-1 formation most of the crosses will go over a typical striker’s head. There’s also Wenger’s nihilistic outlook, which is deftly woven into his lineup- his personal philosophy draws heavily from Herbert Chapman literature, for instance. The fans understand this stuff; they have the intellectual capacity to truly appreciate the depths of these losses, to realise that they’re not just funny- they say something deep about LIFE. As a consequence people who dislike the Arsenal truly ARE idiots- of course they wouldn’t appreciate, for instance, the humour in the Gunners’ existential catchphrase “Wenger Out!” which itself is a cryptic reference to the Invincibles Season. I’m smirking right now just imagining one of those addlepated simpletons scratching their heads in confusion as Mesut Ozil’s genius wit unfolds itself on their television screens. What fools.. how I pity them.  😂\n And yes, by the way, i DO have an Arsenal tattoo. And no, you cannot see it. It’s for the ladies’ eyes only- and even then they have to demonstrate that they’re within 5 IQ points of my own (preferably lower) beforehand. Nothin personnel kid  😎"
     return body
 
+
 def wengerSucks():
     wenger = 'wengerSucks.txt'
-    with open(wenger,'r') as f:
+    with open(wenger, 'r') as f:
         content = f.readlines()
     return content
 
+
 @bot.event
 async def on_ready():
-    #set playing status
+    # set playing status
     await bot.change_presence(activity=discord.Game(name='Wengerball'))
     print('Logged on as')
     print(bot.user.name)
@@ -125,14 +142,15 @@ async def on_message(message):
     if message.author == bot.user:
         return
     if msgLower.startswith(prefix+'help'):
-        em = discord.Embed(title='Arsene Wenger Help Message',description=helpMessage())
+        em = discord.Embed(title='Arsene Wenger Help Message',
+                           description=helpMessage())
         await message.channel.send(embed=em)
     if msgLower.startswith(prefix+'table'):
         body = getTable.discordMain()
-        await message.channel.send( '```' + body + '```')
+        await message.channel.send('```' + body + '```')
     if msgLower.startswith(prefix+'europa'):
         body = europaTable.main()
-        await message.channel.send( '```' + body + '```')
+        await message.channel.send('```' + body + '```')
     if msgLower.startswith(prefix+'ping'):
         await message.channel.send('pong')
     if 'tottenham' in msgLower:
@@ -145,36 +163,39 @@ async def on_message(message):
         await message.add_reaction('🔙')
         await message.add_reaction('🔛')
         await message.add_reaction('🔝')
-    #if 'craig' in msgLower:
+    # if 'craig' in msgLower:
     #    await message.add_reaction('<:fuckcraig:658343402425024552>')
     if msgLower.startswith(prefix+'wengerfact'):
         if str(message.channel) == 'unaifacts':
-            await bot.send_message(message.author,"Please don't use "+prefix+"wengerfact in "+str(message.channel))
+            await bot.send_message(message.author, "Please don't use "+prefix+"wengerfact in "+str(message.channel))
         else:
             fact = fetchRandomFact('wenger')
             await message.channel.send(fact)
     if msgLower.startswith(prefix+'unaifact'):
         if str(message.channel) == 'unaifacts':
-            await bot.send_message(message.author,"Please don't use "+prefix+"unaifact in this channel: "+str(message.channel))
+            await bot.send_message(message.author, "Please don't use "+prefix+"unaifact in this channel: "+str(message.channel))
         else:
             fact = fetchRandomFact('unai')
             await message.channel.send(fact)
     if msgLower.startswith(prefix+'artetafact'):
         if str(message.channel) == 'unaifacts':
-            await bot.send_message(message.author,"Please don't use "+prefix+"artetafact in "+str(message.channel))
+            await bot.send_message(message.author, "Please don't use "+prefix+"artetafact in "+str(message.channel))
         else:
             fact = fetchRandomFact('arteta')
             await message.channel.send(fact)
     if msgLower.startswith(prefix+'fixture'):
         body = findMatches.discordFixtures()
-        await message.channel.send('```'+body+'```')
+        await message.channel.send('```' + body + '```')
+    if msgLower.startswith(prefix + 'euros'):
+        body = findMatches.discordFixturesEuros()
+        await message.channel.send('```' + body + '```')
     if msgLower.startswith(prefix+'results'):
         body = findMatches.discordResults()
         await message.channel.send('```'+body+'```')
-    #if msgLower.startswith(prefix+'time'):
+    # if msgLower.startswith(prefix+'time'):
         #body = schedule.main()
-        #await message.channel.send(body)
-    #if '💥' in msgLower:
+        # await message.channel.send(body)
+    # if '💥' in msgLower:
     #    await message.channel.send("💥"+"<:xhaak:531803960680513536><:laca:531803959028088833>")
     if '<:ornstein:346679834501709824>' in msgLower:
         await message.add_reaction('❤')
@@ -182,9 +203,9 @@ async def on_message(message):
     if 'brexit' in msgLower:
         await message.add_reaction('brexit:521984465132847104')
     if '<:feelsarsenalman:522208659443417099>' in msgLower:
-        await message.add_reaction( 'feelsarsenalman:522208659443417099')
+        await message.add_reaction('feelsarsenalman:522208659443417099')
     if '<:feelsinvincibleman:375919858845483008>' in msgLower:
-        await message.add_reaction( ':feelsinvincibleman:375919858845483008')
+        await message.add_reaction(':feelsinvincibleman:375919858845483008')
     if '<:nelson:346679834090668034>' in msgLower:
         await message.add_reaction('Bossielny:346679834535264257')
     if msgLower.startswith(prefix+'wengyboi'):
@@ -197,17 +218,17 @@ async def on_message(message):
         body = wengerSucks()
         await message.channel.send(body)
     if 'sanchez' in msgLower:
-        await message.add_reaction( 'rekt:406186499802136597')
+        await message.add_reaction('rekt:406186499802136597')
     if any(ele in msgLower for ele in banned):
         await message.delete()
-        await message.channel.send("Sorry "+ str(message.author) +" that source is not allowed.")
+        await message.channel.send("Sorry " + str(message.author) + " that source is not allowed.")
     if msgLower.startswith(prefix+'clear'):
         if message.author.id == '193393269068136448':
            # clearMessages(message)
             numMsg = int(message.content.split(' ')[1])
             msg = []
             async for x in bot.logs_from(message.channel, limit=numMsg):
-                msg.append(x)        
+                msg.append(x)
             await bot.delete_messages(msg)
         else:
             await bot.delete_message(message)
@@ -219,6 +240,6 @@ try:
     f.close()
     bot.run(token.rstrip())
 except Exception as e:
-    print (getTimestamp() +"setup error\n")
+    print(getTimestamp() + "setup error\n")
     print(e)
     sleep(5)
