@@ -42,7 +42,7 @@ If you have any features you would like to suggest or need any support, please d
 [stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
 [open-issues-shield]: https://img.shields.io/github/issues/AndyReifman/ArseneWenger.svg?style=for-the-badge
 [open-issues-url]: https://github.com/AndyReifman/ArseneWenger/issues
-[closed-issues-shield]: https://img.shields.io/github/issues-closed/AndyReifman/ArseneWenger.svg?style=for-the-badge
+[closed-issues-shield]: https://img.shields.io/github/issues-closed-raw/AndyReifman/ArseneWenger.svg?style=for-the-badge
 [closed-issues-url]: https://github.com/AndyReifman/ArseneWenger/issues?q=is%3Aclosed
 [license-shield]: https://img.shields.io/github/license/AndyReifman/ArseneWenger.svg?style=for-the-badge
 [license-url]: https://github.com/AndyReifman/ArseneWenger/blob/main/LICENSE
