@@ -7,6 +7,7 @@ from collections import Counter
 from itertools import groupby
 from time import sleep
 from bs4 import BeautifulSoup
+from fotmob import fotmob
 
 i = 0
 
@@ -174,6 +175,21 @@ def findResults(matches):
         team = homeTeam + " (A)"
     body += "| " + date + " | " + result + " | " + team +" | " +comp+" |\n"
     return body
+
+def getEuro():
+    fixtures = fotmob.getLeague(50,"overview","league","UTC")
+    body = ""
+    for match in fixtures[:5]:
+        body += match.getDate() + " | "
+        if match.getKickOff():
+            body += match.getKickOff() + " | "
+        else:
+            body += match.getResult() + " | "
+        body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
+    return body
+    
+
+    
 
 
 def discordFixtures():

@@ -171,6 +171,9 @@ async def on_message(message):
     if msgLower.startswith(prefix+'results'):
         body = findMatches.discordResults()
         await message.channel.send('```'+body+'```')
+    if msgLower.startswith(prefix+'euro'):
+        body = findMatches.getEuro()
+        await message.channel.send('```'+body+'```')
     #if msgLower.startswith(prefix+'time'):
         #body = schedule.main()
         #await message.channel.send(body)
