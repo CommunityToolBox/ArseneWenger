@@ -1,13 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import praw,re,logging,logging.handlers,datetime,requests,requests.auth,sys,json,unicodedata
+import praw,re,logging,logging.handlers,requests,requests.auth,sys,json,unicodedata
 from praw.models import Message
 from collections import Counter
 from itertools import groupby
 from time import sleep
 from bs4 import BeautifulSoup
 from fotmob import fotmob
+from datetime import datetime,timedelta
 
 i = 0
 
@@ -177,9 +178,17 @@ def findResults(matches):
     return body
 
 def getEuro():
-    fixtures = fotmob.getLeague(50,"overview","league","UTC")
+    matches = []
     body = ""
-    for match in fixtures[:5]:
+    today = datetime.today().strftime('%Y%m%d')
+    while len(matches) < 5 and int(today) < 20210711:
+        fixtures = fotmob.getLeague(50,"overview","league","UTC",today)
+        for match in fixtures[:5]:
+            matches.append(match)
+            if len(matches) > 5:
+                break
+        today = str(int(today) + 1)
+    for match in matches: 
         body += match.getDate() + " | "
         if match.getKickOff():
             body += match.getKickOff() + " | "
@@ -187,9 +196,7 @@ def getEuro():
             body += match.getResult() + " | "
         body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
     return body
-    
 
-    
 
 
 def discordFixtures():
@@ -202,3 +209,4 @@ def discordResults():
     #nextMatch = parseNext(nextMatch)   
     body = findResults(fixtures)
     return body 
+
