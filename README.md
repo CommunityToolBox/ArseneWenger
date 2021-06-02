@@ -2,7 +2,8 @@
 
 [![Contributors][contributors-shield]][contributors-url]
 [![Open Issues][open-issues-shield]][open-issues-url]
-[![Closed Issues][closed-issues-shield]][closed-issues-url]
+[![Forks][forks-shield]][forks-url]
+
 
 Welcome to the best bot named after a former Arsenal manager that lives in the /r/gunners Discord channel
 
@@ -36,8 +37,8 @@ If you have any features you would like to suggest or need any support, please d
 <!-- MARKDOWN LINKS & IMAGES -->
 [contributors-shield]: https://img.shields.io/github/contributors/AndyReifman/ArseneWenger.svg?style=for-the-badge
 [contributors-url]: https://github.com/AndyReifman/ArseneWenger/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
+[forks-shield]: https://img.shields.io/github/forks/AndyReifman/ArseneWenger.svg?style=for-the-badge
+[forks-url]: https://github.com/AndyReifman/ArseneWenger/network/members
 [stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
 [stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
 [open-issues-shield]: https://img.shields.io/github/issues/AndyReifman/ArseneWenger.svg?style=for-the-badge
