@@ -89,7 +89,9 @@ def findFixtures(matches):
             comp = matches[i].find("div",{"class","event-info__extra"}).text
         except:
             time = "TBD"
-            date = matches[i].find("div",class_=False, id=False).text[3:].strip()
+            #date = matches[i].find("div",class_=False, id=False).text[3:].strip()
+            date = matches[i].find("div",class_=False, id=False).text.split(' ')
+            date = (date[0][:3] + " " + date[1]).split(',')[0]
             comp = matches[i].find("div",{"class","event-info__extra"}).text
         team = match.find("span",{"class","team-crest__name-value"}).text
         location = match.find("div",{"class","location-icon"})['title']
