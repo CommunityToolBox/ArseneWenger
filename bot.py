@@ -176,6 +176,9 @@ async def on_message(message):
         if (fuzz.partial_ratio("euro",msgLower[1:])) > 90:
             body = findMatches.getEuro()
             await message.channel.send('```'+body+'```')
+        if (fuzz.partial_ratio("copa",msgLower[1:])) > 90:
+                body = findMatches.getCopa()
+                await message.channel.send('```'+body+'```')
         #if msgLower.startswith(prefix+'time'):
             #body = schedule.main()
             #await message.channel.send(body)

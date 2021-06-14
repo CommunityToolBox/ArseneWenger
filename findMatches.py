@@ -199,7 +199,26 @@ def getEuro():
         body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
     return body
 
-
+def getCopa():
+    matches = []
+    body = ""
+    today = datetime.today().strftime('%Y%m%d')
+    while len(matches) < 5 and int(today) < 20210711:
+        fixtures = fotmob.getLeague(44,"overview","league","UTC",today)
+        for match in fixtures[:5]:
+            matches.append(match)
+            if len(matches) > 5:
+                break
+        today = str(int(today) + 1)
+    for match in matches: 
+        body += match.getDate() + " | "
+        if match.getKickOff():
+            body += match.getKickOff() + " | "
+        else:
+            body += match.getResult() + " | "
+        body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
+    return body
+    
 
 def discordFixtures():
     fixtures = parseFixtures()
