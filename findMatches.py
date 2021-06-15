@@ -179,32 +179,12 @@ def findResults(matches):
     body += "| " + date + " | " + result + " | " + team +" | " +comp+" |\n"
     return body
 
-def getEuro():
+def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally written for the euros so i have set the euros parameters as default
     matches = []
     body = ""
     today = datetime.today().strftime('%Y%m%d')
-    while len(matches) < 5 and int(today) < 20210711:
-        fixtures = fotmob.getLeague(50,"overview","league","UTC",today)
-        for match in fixtures[:5]:
-            matches.append(match)
-            if len(matches) > 5:
-                break
-        today = str(int(today) + 1)
-    for match in matches: 
-        body += match.getDate() + " | "
-        if match.getKickOff():
-            body += match.getKickOff() + " | "
-        else:
-            body += match.getResult() + " | "
-        body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
-    return body
-
-def getCopa():
-    matches = []
-    body = ""
-    today = datetime.today().strftime('%Y%m%d')
-    while len(matches) < 5 and int(today) < 20210711:
-        fixtures = fotmob.getLeague(44,"overview","league","UTC",today)
+    while len(matches) < 5 and int(today) < endDate:
+        fixtures = fotmob.getLeague(leagueCode,"overview","league","UTC",today)
         for match in fixtures[:5]:
             matches.append(match)
             if len(matches) > 5:
