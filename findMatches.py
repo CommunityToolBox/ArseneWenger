@@ -193,7 +193,10 @@ def getEuro():
     for match in matches: 
         body += match.getDate() + " | "
         if match.getKickOff():
-            body += match.getKickOff() + " | "
+            if match.getKickOff() == 'In Progress':
+                body += match.getResult() + " | "
+            else:
+                body += match.getKickOff() + " | "
         else:
             body += match.getResult() + " | "
         body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
