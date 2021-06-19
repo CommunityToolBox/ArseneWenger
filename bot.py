@@ -8,7 +8,6 @@ import europaTable
 #import schedule
 from time import sleep
 from discord.utils import get
-from fuzzywuzzy import fuzz
 
 prefix = '!'
 bot = discord.Client()
@@ -167,16 +166,15 @@ async def on_message(message):
             else:
                 fact = fetchRandomFact('arteta')
                 await message.channel.send(fact)
-        if (fuzz.partial_ratio("fixture",msgLower[1:])) > 90:
+        if re.search(r'fixture[s]?$',msgLower[1:]):
             body = findMatches.discordFixtures()
             await message.channel.send('```'+body+'```')
-        if (fuzz.partial_ratio("result",msgLower[1:])) > 90:
+        if re.search(r'result[s]?$',msgLower[1:]):
             body = findMatches.discordResults()
-            await message.channel.send('```'+body+'```')
-        if (fuzz.partial_ratio("euro",msgLower[1:])) > 90:
+        if re.search(r'euro[s]?$',msgLower[1:]):
             body = findMatches.getInternationalCup()
             await message.channel.send('```'+body+'```')
-        if (fuzz.partial_ratio("copa",msgLower[1:])) > 90:
+        if re.search(r'copa[s]?$',msgLower[1:]):
                 body = findMatches.getInternationalCup(44, 20210710)
                 await message.channel.send('```'+body+'```')
         #if msgLower.startswith(prefix+'time'):
