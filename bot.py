@@ -177,6 +177,13 @@ async def on_message(message):
         if re.search(r'copa[s]?$',msgLower[1:]):
                 body = findMatches.getInternationalCup(44, 20210710)
                 await message.channel.send('```'+body+'```')
+        if (fuzz.partial_ratio("olympics",msgLower[1:])) > 90:
+                body = findMatches.getInternationalCup(66, 20210810)
+                await message.channel.send('```'+"Men:"+'```')
+                await message.channel.send('```'+body+'```')
+                body = findMatches.getInternationalCup(65, 20210810)
+                await message.channel.send('```'+"Women:"+'```')
+                await message.channel.send('```'+body+'```')
         #if msgLower.startswith(prefix+'time'):
             #body = schedule.main()
             #await message.channel.send(body)
