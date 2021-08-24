@@ -61,7 +61,7 @@ def parseResults():
     matches = table.findAll("article",attrs={'role':'article'})
     return matches
 
-def findFixtures(matches):
+def findFixtures(matches, number):
     body = ""
     match = matches[0].find("div",{"class","fixture-match"})
     date = matches[0].find("time").text
@@ -77,8 +77,13 @@ def findFixtures(matches):
     else:
         team = homeTeam + " (A)"
     body += "| " + date + " | " + time + " | " + team +" | " +comp+" |\n"
-    x = 3
-    if len(matches) < 3:
+    if number == 0:
+        x = 3
+    elif number >= 10:
+        x = 3
+    else:
+        x = number
+    if len(matches) < x:
         x = len(matches)
     for i in range(1,x):
         match = matches[i].find("div",{"class","card__content"})
@@ -203,9 +208,9 @@ def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally writte
     return body
     
 
-def discordFixtures():
+def discordFixtures(number = 3):
     fixtures = parseFixtures()
-    body = findFixtures(fixtures)
+    body = findFixtures(fixtures, number)
     return body 
 
 def discordResults():

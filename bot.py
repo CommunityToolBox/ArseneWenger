@@ -169,6 +169,10 @@ async def on_message(message):
         if re.search(r'fixture[s]?$',msgLower[1:]):
             body = findMatches.discordFixtures()
             await message.channel.send('```'+body+'```')
+        if re.search(r'fixture[s][ ][\\d]?$',msgLower[1:]): #number must be lower than 10
+            m = re.search(r'fixture[s][ ][\\d]?$',msgLower[1:])
+            body = findMatches.discordFixtures(m.group(0)[-1])
+            await message.channel.send('```'+body+'```')
         if re.search(r'result[s]?$',msgLower[1:]):
             body = findMatches.discordResults()
         if re.search(r'euro[s]?$',msgLower[1:]):
