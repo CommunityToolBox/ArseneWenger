@@ -78,13 +78,7 @@ def findFixtures(matches, number):
     else:
         team = homeTeam + " (A)"
     body += "| " + date + " | " + time + " | " + team +" | " +comp+" |\n"
-<<<<<<< HEAD
     if number == 0 or number > 10:
-=======
-    if number == 0:
-        x = 3
-    elif number >= 10:
->>>>>>> dadfec2139e6c32e126a553de86c19a11d3868d2
         x = 3
     else:
         x = number
