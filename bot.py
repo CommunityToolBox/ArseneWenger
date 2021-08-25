@@ -71,6 +71,8 @@ def helpMessage():
     help += prefix+'unaifact\nGet a random fact about our former manager Unai Emery.\n'
     help += prefix+'artetafact\nGet a random fact about our manager Unai Emery.\n'
     help += prefix+'fixtures\nDisplay the next 3 fixtures.\n'
+    help += prefix+'fixtures #\nDisplay the next # fixtures.\n'
+    help += prefix+'next\nDisplay the time between now in utc and the next match.\n'
     help += prefix+'wengyboi <#>\nMake a wengyboi of # length! Max 10.\n'
     help += '```'
     return help
@@ -168,6 +170,13 @@ async def on_message(message):
                 await message.channel.send(fact)
         if re.search(r'fixture[s]?$',msgLower[1:]):
             body = findMatches.discordFixtures()
+            await message.channel.send('```'+body+'```')
+        if re.search(r'fixture[s][ ][\d][\d]?$',msgLower[1:]):
+            num = int(msgLower[-2:])
+            body = findMatches.discordFixtures(num)
+            await message.channel.send('```'+body+'```')
+        if re.search(r'next?$',msgLower[1:]):
+            body = findMatches.nextFixture()
             await message.channel.send('```'+body+'```')
         if re.search(r'result[s]?$',msgLower[1:]):
             body = findMatches.discordResults()
