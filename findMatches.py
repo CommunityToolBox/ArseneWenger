@@ -9,6 +9,7 @@ from time import sleep
 from bs4 import BeautifulSoup
 from fotmob import fotmob
 from datetime import datetime,timedelta
+from datetime import date
 
 i = 0
 
@@ -77,9 +78,13 @@ def findFixtures(matches, number):
     else:
         team = homeTeam + " (A)"
     body += "| " + date + " | " + time + " | " + team +" | " +comp+" |\n"
+<<<<<<< HEAD
+    if number == 0 or number > 10:
+=======
     if number == 0:
         x = 3
     elif number >= 10:
+>>>>>>> dadfec2139e6c32e126a553de86c19a11d3868d2
         x = 3
     else:
         x = number
@@ -94,7 +99,6 @@ def findFixtures(matches, number):
             comp = matches[i].find("div",{"class","event-info__extra"}).text
         except:
             time = "TBD"
-            #date = matches[i].find("div",class_=False, id=False).text[3:].strip()
             date = matches[i].find("div",class_=False, id=False).text.split(' ')
             date = (date[0][:3] + " " + date[1]).split(',')[0]
             comp = matches[i].find("div",{"class","event-info__extra"}).text
@@ -211,7 +215,7 @@ def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally writte
 def discordFixtures(number = 3):
     fixtures = parseFixtures()
     body = findFixtures(fixtures, number)
-    return body 
+    return body
 
 def discordResults():
     fixtures = parseResults()
@@ -219,3 +223,17 @@ def discordResults():
     body = findResults(fixtures)
     return body 
 
+def nextFixture():
+    body = discordFixtures(1)
+    if (date.today()).month == 12 and "jan" in (body.split("|")[1]).lower():
+        nextMatchDate = f"""{((body.split("|")[1]).strip())} {((date.today()).year)+1}  {(body.split("|")[2]).strip()}"""
+    else:
+        nextMatchDate = f"""{((body.split("|")[1]).strip())} {(date.today()).year}  {(body.split("|")[2]).strip()}"""
+    
+    dateObject = dateObject = datetime.strptime(nextMatchDate, '%b %d %Y %H:%M')
+    delta = dateObject - datetime.utcnow()
+    if delta.days > 0:
+        response = f"Next match is in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+    else:
+        response = f"Next match is in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+    return response
