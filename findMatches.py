@@ -9,6 +9,7 @@ from time import sleep
 from bs4 import BeautifulSoup
 from fotmob import fotmob
 from datetime import datetime,timedelta
+from datetime import date
 
 i = 0
 
@@ -61,7 +62,7 @@ def parseResults():
     matches = table.findAll("article",attrs={'role':'article'})
     return matches
 
-def findFixtures(matches):
+def findFixtures(matches, number):
     body = ""
     match = matches[0].find("div",{"class","fixture-match"})
     date = matches[0].find("time").text
@@ -77,8 +78,11 @@ def findFixtures(matches):
     else:
         team = homeTeam + " (A)"
     body += "| " + date + " | " + time + " | " + team +" | " +comp+" |\n"
-    x = 3
-    if len(matches) < 3:
+    if number == 0 or number > 10:
+        x = 3
+    else:
+        x = number
+    if len(matches) < x:
         x = len(matches)
     for i in range(1,x):
         match = matches[i].find("div",{"class","card__content"})
@@ -89,7 +93,6 @@ def findFixtures(matches):
             comp = matches[i].find("div",{"class","event-info__extra"}).text
         except:
             time = "TBD"
-            #date = matches[i].find("div",class_=False, id=False).text[3:].strip()
             date = matches[i].find("div",class_=False, id=False).text.split(' ')
             date = (date[0][:3] + " " + date[1]).split(',')[0]
             comp = matches[i].find("div",{"class","event-info__extra"}).text
@@ -203,10 +206,10 @@ def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally writte
     return body
     
 
-def discordFixtures():
+def discordFixtures(number = 3):
     fixtures = parseFixtures()
-    body = findFixtures(fixtures)
-    return body 
+    body = findFixtures(fixtures, number)
+    return body
 
 def discordResults():
     fixtures = parseResults()
@@ -214,3 +217,17 @@ def discordResults():
     body = findResults(fixtures)
     return body 
 
+def nextFixture():
+    body = discordFixtures(1)
+    if (date.today()).month == 12 and "jan" in (body.split("|")[1]).lower():
+        nextMatchDate = f"""{((body.split("|")[1]).strip())} {((date.today()).year)+1}  {(body.split("|")[2]).strip()}"""
+    else:
+        nextMatchDate = f"""{((body.split("|")[1]).strip())} {(date.today()).year}  {(body.split("|")[2]).strip()}"""
+    
+    dateObject = dateObject = datetime.strptime(nextMatchDate, '%b %d %Y %H:%M')
+    delta = dateObject - datetime.utcnow()
+    if delta.days > 0:
+        response = f"Next match is in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+    else:
+        response = f"Next match is in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+    return response
