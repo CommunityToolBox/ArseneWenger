@@ -41,7 +41,17 @@ def getLocation(line):
     else:
         return 1
 
-
+def bst_flag():
+    """returns true if we are in bst"""
+    date_plus_7 = datetime.utcnow().date() + timedelta(days=7)
+    #BST falls between the last Sunday of march and the last sunday of october.  
+    if (datetime.utcnow().date()).month > 3 & (datetime.utcnow().date()).month < 11:
+        return True
+    #to account for that last sunday, if I add seven to the last remaining dates in march and october, i could account for that   
+    elif ((datetime.utcnow().date()).month) == 3 & (date_plus_7.month > 3 & date_plus_7.month < 11):
+        return True
+    else:
+        return False
 
 def parseFixtures():
     website = "https://www.arsenal.com/fixtures"
@@ -183,6 +193,7 @@ def findResults(matches):
     return body
 
 def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally written for the euros so i have set the euros parameters as default
+    """Gets the current international cup progression"""
     matches = []
     body = ""
     today = datetime.today().strftime('%Y%m%d')
@@ -204,7 +215,6 @@ def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally writte
             body += match.getResult() + " | "
         body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
     return body
-    
 
 def discordFixtures(number = 3):
     fixtures = parseFixtures()
@@ -213,11 +223,11 @@ def discordFixtures(number = 3):
 
 def discordResults():
     fixtures = parseResults()
-    #nextMatch = parseNext(nextMatch)   
     body = findResults(fixtures)
     return body 
 
 def nextFixture():
+    """Returns how many days, hours, and minutes are left until the next fixture"""
     body = discordFixtures(1)
     if (date.today()).month == 12 and "jan" in (body.split("|")[1]).lower():
         nextMatchDate = f"""{((body.split("|")[1]).strip())} {((date.today()).year)+1}  {(body.split("|")[2]).strip()}"""
@@ -225,7 +235,10 @@ def nextFixture():
         nextMatchDate = f"""{((body.split("|")[1]).strip())} {(date.today()).year}  {(body.split("|")[2]).strip()}"""
     
     dateObject = dateObject = datetime.strptime(nextMatchDate, '%b %d %Y %H:%M')
-    delta = dateObject - datetime.utcnow()
+    if (bst_flag()):
+        delta = dateObject - (datetime.utcnow() + timedelta(hours=1))
+    else:
+        delta = dateObject - datetime.utcnow()
     if delta.days > 0:
         response = f"Next match is in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
     else:
