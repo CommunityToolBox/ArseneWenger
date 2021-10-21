@@ -180,6 +180,7 @@ async def on_message(message):
             await message.channel.send('```'+body+'```')
         if re.search(r'result[s]?$',msgLower[1:]):
             body = findMatches.discordResults()
+            await message.channel.send('```'+body+'```')
         if re.search(r'euro[s]?$',msgLower[1:]):
             body = findMatches.getInternationalCup()
             await message.channel.send('```'+body+'```')
