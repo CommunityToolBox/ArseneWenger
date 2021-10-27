@@ -138,6 +138,13 @@ def discordMain():
         cols.pop(6)
         data.append([ele for ele in cols if ele]) # Get rid of empty values
 
-    table=tabulate.tabulate(data,headers='firstrow',tablefmt='simple')
+    for row in data:
+      if row[1]=='Arsenal':
+        row[0]="‣ "+row[0]
+        # row.insert(0,"►")
+        # row.append("◄")
+      
+
+    table=tabulate.tabulate(data,headers='firstrow',tablefmt='simple',colalign=('right',))
     print(table)
     return table #Returns table
