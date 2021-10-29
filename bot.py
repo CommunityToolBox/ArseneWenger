@@ -154,10 +154,8 @@ async def on_message(message):
                 d.text((5, 10), body, (0,0,0), font=font)
                 img.save('tempImg.jpg')
 
-            embd=discord.Embed(title='EPL Standings')
-            file = discord.File("tempImg.jpg", filename="image.jpg")
-            embd.set_image(url="attachment://image.jpg")
-            await message.channel.send(file=file, embed=embd)
+            await message.channel.send("EPL Standings",file=discord.File('tempImg.jpg'))
+            
         if msgLower.startswith(prefix+'europa'):
             body = europaTable.main()
             await message.channel.send( '```' + body + '```')
