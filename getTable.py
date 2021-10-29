@@ -146,5 +146,4 @@ def discordMain():
       
 
     table=tabulate.tabulate(data,headers='firstrow',tablefmt='simple',colalign=('right',))
-    print(table)
     return table #Returns table
