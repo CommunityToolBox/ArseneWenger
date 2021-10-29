@@ -140,7 +140,7 @@ def discordMain():
 
     for row in data:
       if row[1]=='Arsenal':
-        row[0]="* "+row[0]
+        row[0]="-> "+row[0]
         # row.insert(0,"►")
         # row.append("◄")
       
