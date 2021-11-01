@@ -133,7 +133,7 @@ async def on_message(message):
             await message.channel.send(embed=em)
         if msgLower.startswith(prefix+'table'):
             bg=msgLower.split(' ')
-            body = getTable.discordMain()
+            body = getTable.livetable()
             if len(bg)==1:
               img = Image.new('RGB', (1045, 840), (47,49,54))
               d = ImageDraw.Draw(img)
