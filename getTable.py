@@ -158,18 +158,18 @@ def livetable():
       x2=x2+lines_d
       if "tableCompetitionExplainedContainer" in lines_d:
         break
-    
     tableslist=pd.read_html(x2)[0]
     rows=tableslist.to_numpy().tolist()
     i=0
     data=[['#', 'Team', 'Pl', 'W', 'D', 'L', 'GD', 'Pts']]
     while i < len(rows):
       tablerow=rows[i]
-      risefall=[tablerow[0][0],tablerow[0][-1]]
-      if int(risefall[0])>int(risefall[1]):
-        risefallind='v '
-      elif int(risefall[0])<int(risefall[1]):   
+      risefall=[tablerow[0].split(' ',1)[0],tablerow[0].rsplit(' ',1)[1]]
+      print(risefall)
+      if int(risefall[0])<int(risefall[1]):
         risefallind='^ '
+      elif int(risefall[0])>int(risefall[1]):   
+        risefallind='v '
       else:
         risefallind='- '
       pos=risefall[0]
