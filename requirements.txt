@@ -8,3 +8,4 @@ python-fotmob-wrapper
 datetime
 tabulate
 Pillow
+pandas
