@@ -9,6 +9,7 @@ from itertools import groupby
 from time import sleep
 from bs4 import BeautifulSoup
 import tabulate
+import pandas as pd
 
 def getTimestamp():
         dt = str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + ' '
@@ -138,6 +139,54 @@ def discordMain():
         cols.pop(6)
         data.append([ele for ele in cols if ele]) # Get rid of empty values
 
-    table=tabulate.tabulate(data,headers='firstrow',tablefmt='simple')
-    print(table)
+    for row in data:
+      if row[1]=='Arsenal':
+        row[0]="-> "+row[0]
+        # row.insert(0,"►")
+        # row.append("◄")
+      
+
+    table=tabulate.tabulate(data,headers='firstrow',tablefmt='simple',colalign=('right',))
     return table #Returns table
+
+def livetable():
+    tableurl="https://www.premierleague.com/tables"
+    x1=requests.get(tableurl, stream=True)
+    x2=""
+    for lines in x1.iter_lines():
+      lines_d=lines.decode('utf-8')
+      x2=x2+lines_d
+      if "tableCompetitionExplainedContainer" in lines_d:
+        break
+    tableslist=pd.read_html(x2)[0]
+    rows=tableslist.to_numpy().tolist()
+    i=0
+    data=[['#', 'Team', 'Pl', 'W', 'D', 'L', 'GD', 'Pts']]
+    while i < len(rows):
+      tablerow=rows[i]
+      risefall=[tablerow[0].split(' ',1)[0],tablerow[0].rsplit(' ',1)[1]]
+      print(risefall)
+      if int(risefall[0])<int(risefall[1]):
+        risefallind='^ '
+      elif int(risefall[0])>int(risefall[1]):   
+        risefallind='v '
+      else:
+        risefallind='- '
+      pos=risefall[0]
+      fullteamname=tablerow[1].rsplit(" ", 1)[0].strip()
+      team=shortenedClubNames(fullteamname)
+      if team=='Arsenal':
+        pos="-> "+pos
+      pl=tablerow[2]
+      w=tablerow[3]
+      d=tablerow[4]
+      l=tablerow[5]
+      gd=tablerow[8]
+      pts=tablerow[9]
+      team=risefallind+team
+      data.append([pos, team, pl, w, d, l, gd, pts])
+      i=i+2  
+    
+    tabulate.PRESERVE_WHITESPACE=False
+    table=tabulate.tabulate(data,headers='firstrow',tablefmt='pretty',colalign=('right','left',))
+    return table

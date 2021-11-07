@@ -8,6 +8,7 @@ import europaTable
 #import schedule
 from time import sleep
 from discord.utils import get
+from PIL import Image, ImageDraw, ImageFont
 
 prefix = '!'
 bot = discord.Client()
@@ -131,8 +132,30 @@ async def on_message(message):
             em = discord.Embed(title='Arsene Wenger Help Message',description=helpMessage())
             await message.channel.send(embed=em)
         if msgLower.startswith(prefix+'table'):
-            body = getTable.discordMain()
-            await message.channel.send( '```' + body + '```')
+            bg=msgLower.split(' ')
+            body = getTable.livetable()
+            if len(bg)==1:
+              img = Image.new('RGB', (1045, 840), (47,49,54))
+              d = ImageDraw.Draw(img)
+              font = ImageFont.truetype("AnonymousPro.ttf", 36)
+              d.text((5, 10), body, (255,255,255), font=font)
+              img.save('tempImg.jpg')
+            else:
+              if bg[1]=='d' or bg[1]=='dark':
+                img = Image.new('RGB', (1045, 840), (47,49,54))
+                d = ImageDraw.Draw(img)
+                font = ImageFont.truetype("AnonymousPro.ttf", 36)
+                d.text((5, 10), body, (255,255,255), font=font)
+                img.save('tempImg.jpg')
+              elif bg[1]=='l' or bg[1]=='light' or bg[1]=='w' or bg[1]=='white':
+                img = Image.new('RGB', (1045, 840), (255,255,255))
+                d = ImageDraw.Draw(img)
+                font = ImageFont.truetype("AnonymousPro.ttf", 36)
+                d.text((5, 10), body, (0,0,0), font=font)
+                img.save('tempImg.jpg')
+
+            await message.channel.send("EPL Standings",file=discord.File('tempImg.jpg'))
+            
         if msgLower.startswith(prefix+'europa'):
             body = europaTable.main()
             await message.channel.send( '```' + body + '```')
