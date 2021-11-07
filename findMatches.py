@@ -45,10 +45,10 @@ def bst_flag():
     """returns true if we are in bst"""
     date_plus_7 = datetime.utcnow().date() + timedelta(days=7)
     #BST falls between the last Sunday of march and the last sunday of october.  
-    if (datetime.utcnow().date()).month > 3 & (datetime.utcnow().date()).month < 11:
+    if (datetime.utcnow().date()).month > 3 and (datetime.utcnow().date()).month < 11:
         return True
     #to account for that last sunday, if I add seven to the last remaining dates in march and october, i could account for that   
-    elif ((datetime.utcnow().date()).month) == 3 & (date_plus_7.month > 3 & date_plus_7.month < 11):
+    elif ((datetime.utcnow().date()).month) == 3 and (date_plus_7.month > 3 and date_plus_7.month < 11):
         return True
     else:
         return False
