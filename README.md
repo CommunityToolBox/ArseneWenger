@@ -7,6 +7,19 @@
 
 Welcome to the best bot named after a former Arsenal manager that lives in the /r/gunners Discord channel
 
+## Setup
+This guide assumes you've already setup git and your SSH keys with your personal GitHub account.
+
+If not already setup, follow https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account
+
+1. Fork, and download the project locally, and follow https://dev.to/codesphere/create-a-discord-bot-in-minutes-with-python-2jgp to setup the bot.
+2. Switch the tracking branch of your project to your personal fork
+   1. `git remote rename origin upstream`
+   2. `git remote add origin <URL_OF_YOUR_FORK>`
+   3. `git fetch origin`
+   4. `git branch --set-upstream-to origin/master master`
+3. Happy coding!
+
 ## Commands
 
 This bot works with many different commands. At any point you can issue !help to get them listed.
