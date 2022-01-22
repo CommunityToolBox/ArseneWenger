@@ -229,10 +229,13 @@ def discordResults():
 def nextFixture():
     """Returns how many days, hours, and minutes are left until the next fixture"""
     body = discordFixtures(1)
-    if (date.today()).month == 12 and "jan" in (body.split("|")[1]).lower():
-        nextMatchDate = f"""{((body.split("|")[1]).strip())} {((date.today()).year)+1}  {(body.split("|")[2]).strip()}"""
+    splitBod = body.split("|")
+    if (date.today()).month == 12 and "jan" in (splitBod[1]).lower():
+        nextMatchDate = f"""{((splitBod[1]).strip())} {((date.today()).year)+1}  {(splitBod[2]).strip()}"""
     else:
-        nextMatchDate = f"""{((body.split("|")[1]).strip())} {(date.today()).year}  {(body.split("|")[2]).strip()}"""
+        nextMatchDate = f"""{((splitBod[1]).strip())} {(date.today()).year}  {(splitBod[2]).strip()}"""
+
+    opponentInfo = f"""{(splitBod[3]).strip()}"""
     
     dateObject = dateObject = datetime.strptime(nextMatchDate, '%b %d %Y %H:%M')
     if (bst_flag()):
@@ -240,7 +243,7 @@ def nextFixture():
     else:
         delta = dateObject - datetime.utcnow()
     if delta.days > 0:
-        response = f"Next match is in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+        response = f"Next match is {opponentInfo} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
     else:
-        response = f"Next match is in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+        response = f"Next match is {opponentInfo} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
     return response
