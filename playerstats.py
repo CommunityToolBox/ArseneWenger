@@ -5,6 +5,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 import re
+from tabulate import tabulate
 
 
 def getPlayerStats(club):
@@ -38,9 +39,10 @@ def getPlayerStats(club):
 def getGoalsScored(club):
     df_topscorers = getPlayerStats(club).sort_values(by=['goals'], ascending=False, ignore_index=True).head(5)
     df_topscorers.index = df_topscorers.index+1
-    return df_topscorers
+    table=tabulate(df_topscorers,tablefmt='plain',colalign=['left','left'],showindex=False)
+    return table
 
 def main(msgLower):
     match msgLower:
-        case '!goals':
-            return getGoalsScored('Arsenal')
+      case '!goals':
+          return getGoalsScored('Arsenal')
