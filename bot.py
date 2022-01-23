@@ -2,6 +2,8 @@ import discord
 import datetime,sys,re
 import random
 from random import randint
+
+import playerstats
 import findMatches
 import getTable
 import europaTable
@@ -131,6 +133,9 @@ async def on_message(message):
         if msgLower.startswith(prefix+'help'):
             em = discord.Embed(title='Arsene Wenger Help Message',description=helpMessage())
             await message.channel.send(embed=em)
+        if msgLower.startswith(prefix+'goals'):
+            body = playerstats.main(msgLower)
+            await message.channel.send(body)
         if msgLower.startswith(prefix+'table'):
             bg=msgLower.split(' ')
             body = getTable.livetable()
