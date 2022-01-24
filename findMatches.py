@@ -242,8 +242,11 @@ def nextFixture():
         delta = dateObject - (datetime.utcnow() + timedelta(hours=1))
     else:
         delta = dateObject - datetime.utcnow()
-    if delta.days > 0:
-        response = f"Next match is {opponentInfo} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+    if delta < 0:
+        response = f"There is a match playing right now! head over to #live-games"
     else:
-        response = f"Next match is {opponentInfo} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+        if delta.days > 0:
+            response = f"Next match is {opponentInfo} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+        else:
+            response = f"Next match is {opponentInfo} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
     return response
