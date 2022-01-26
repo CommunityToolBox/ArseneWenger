@@ -135,7 +135,7 @@ async def on_message(message):
             await message.channel.send(embed=em)
         if msgLower.startswith(prefix+'goals'):
             body = playerstats.main(msgLower)
-            await message.channel.send(body)
+            await message.channel.send('```'+body+'```')
         if msgLower.startswith(prefix+'table'):
             bg=msgLower.split(' ')
             body = getTable.livetable()
