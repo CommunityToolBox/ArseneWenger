@@ -64,9 +64,11 @@ def getAssists(comp='Premier League'):
     
     tableslist=pd.read_html(x2)[0]
     # End
-    columnlist=list(tableslist.columns)
+  
     sorted_table=tableslist.sort_values([(comp,'Ast')],ascending=False) #Table containing all stats and assists in desc order
     sub_table=sorted_table[[('Unnamed: 0_level_0','Player'),(comp,'Ast')]].to_numpy().tolist()[0:5] # List containing only top 5 assists in desc order
+    for i in sub_table:
+      i[1]=int(i[1])
     tabulate.PRESERVE_WHITESPACE=False
     table=tabulate(sub_table,headers=['Player','Ast'],tablefmt='pretty',colalign=('right','left',))
     table='Assist Stats: '+comp+'\n'+table
