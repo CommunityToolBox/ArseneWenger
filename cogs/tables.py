@@ -1,7 +1,5 @@
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
-
-import datetime
 import re
 import requests
 import requests.auth
@@ -10,7 +8,6 @@ import discord
 import pandas as pd
 import tabulate
 from PIL import Image, ImageDraw, ImageFont
-from bs4 import BeautifulSoup
 from discord.ext import commands
 
 class Tables(commands.Cog):

@@ -19,8 +19,8 @@ def clamp_int(value, minimum, maximum):
     """
     Clamp integer between 2 values
     :param value: Current value
-    :param min: Minimum value
-    :param max: Maximum value
+    :param minimum: Minimum value
+    :param maximum: Maximum value
     :return: Current value, clamped to between min and max
     """
     if value < minimum:
