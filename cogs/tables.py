@@ -28,7 +28,7 @@ class Tables(commands.Cog):
         bg_colour = (255, 255, 255) if light_mode else (47, 49, 54)
         font_colour = (0, 0, 0) if light_mode else (255, 255, 255)
 
-        img = Image.new('RGB', (1045, 840), bg_colour)
+        img = Image.new('RGB', (1130, 840), bg_colour)
         d = ImageDraw.Draw(img)
         font = ImageFont.truetype("AnonymousPro.ttf", 36)
         d.text((5, 10), body, font_colour, font=font)
