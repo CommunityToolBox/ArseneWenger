@@ -136,24 +136,27 @@ async def on_message(message):
         if msgLower.startswith(prefix+'goals'):
             body = playerstats.main(msgLower)
             await message.channel.send('```'+body+'```')
+        if msgLower.startswith(prefix+'assist'):
+            body = playerstats.main(msgLower)
+            await message.channel.send('```'+body+'```')    
         if msgLower.startswith(prefix+'table'):
             bg=msgLower.split(' ')
             body = getTable.livetable()
             if len(bg)==1:
-              img = Image.new('RGB', (1045, 840), (47,49,54))
+              img = Image.new('RGB', (1130, 840), (47,49,54))
               d = ImageDraw.Draw(img)
               font = ImageFont.truetype("AnonymousPro.ttf", 36)
               d.text((5, 10), body, (255,255,255), font=font)
               img.save('tempImg.jpg')
             else:
               if bg[1]=='d' or bg[1]=='dark':
-                img = Image.new('RGB', (1045, 840), (47,49,54))
+                img = Image.new('RGB', (1130, 840), (47,49,54))
                 d = ImageDraw.Draw(img)
                 font = ImageFont.truetype("AnonymousPro.ttf", 36)
                 d.text((5, 10), body, (255,255,255), font=font)
                 img.save('tempImg.jpg')
               elif bg[1]=='l' or bg[1]=='light' or bg[1]=='w' or bg[1]=='white':
-                img = Image.new('RGB', (1045, 840), (255,255,255))
+                img = Image.new('RGB', (1130, 840), (255,255,255))
                 d = ImageDraw.Draw(img)
                 font = ImageFont.truetype("AnonymousPro.ttf", 36)
                 d.text((5, 10), body, (0,0,0), font=font)

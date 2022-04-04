@@ -43,8 +43,52 @@ def getGoalsScored(club):
     table = tabulate(df_topscorers, tablefmt='plain', colalign=['left', 'left'], showindex=False)
     return table
 
+def getAssists(comp='Premier League'):
+    tableurl="https://fbref.com/en/squads/18bb7c10/2021-2022/all_comps/Arsenal-Stats-All-Competitions"
+
+    # Get table and convert to Dataframe
+    page = requests.get(tableurl)
+    x1=requests.get(tableurl, stream=True)
+    x2=""
+    ind=False
+    for lines in x1.iter_lines():
+      lines_d=lines.decode('utf-8')
+      if "div_stats_player_summary" in lines_d:
+        ind=True
+        
+      if ind:  
+        x2=x2+lines_d
+        
+      if "tfooter_stats_player_summary" in lines_d:
+        break
+    
+    tableslist=pd.read_html(x2)[0]
+    # End
+  
+    sorted_table=tableslist.sort_values([(comp,'Ast')],ascending=False) #Table containing all stats and assists in desc order
+    sub_table=sorted_table[[('Unnamed: 0_level_0','Player'),(comp,'Ast')]].to_numpy().tolist()[0:5] # List containing only top 5 assists in desc order
+    for i in sub_table:
+      i[1]=int(i[1])
+    tabulate.PRESERVE_WHITESPACE=False
+    table=tabulate(sub_table,headers=['Player','Ast'],tablefmt='pretty',colalign=('right','left',))
+    table='Assist Stats: '+comp+'\n'+table
+    return table
+    
 
 def main(msgLower):
-    match msgLower:
-        case '!goals':
+    if msgLower=='!goals':
             return getGoalsScored('Arsenal')
+    if msgLower=='!assists':
+            return getAssists()
+    elif len(msgLower.split(" "))>1:
+            param=msgLower.split(" ")
+            if param[1].strip()=='pl':
+                    return getAssists('Premier League')
+            elif param[1].strip()=='all':
+                    return getAssists('Combined')
+            elif param[1].strip()=='fa':
+                    return getAssists('FA Cup')
+            elif param[1].strip()=='efl':
+                    return getAssists('EFL Cup')  
+              
+      
