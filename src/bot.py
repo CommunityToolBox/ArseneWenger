@@ -1,5 +1,5 @@
 import discord
-import datetime,sys,re
+import datetime, re
 import random
 from random import randint
 
@@ -9,7 +9,6 @@ import getTable
 import europaTable
 #import schedule
 from time import sleep
-from discord.utils import get
 from PIL import Image, ImageDraw, ImageFont
 
 prefix = '!'
@@ -91,7 +90,7 @@ def makeWenger(message):
     return body
 
 def bannedThings():
-    with open('banned.txt', 'r') as f:
+    with open('../banned.txt', 'r') as f:
         banned = f.read().splitlines()
     return banned
 
