@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+    #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 An example cog to show how things should be done.
