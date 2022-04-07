@@ -37,7 +37,8 @@ class PlayerStatsCog(commands.Cog):
         help="Get highest goalscorers for a specific team, defaults to Arsenal.")
     async def goals(self, ctx, team: str = 'Arsenal'):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
-            return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team}')
+            return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},'
+                                  f'allowed values are [{", ".join(name.title() for name in self.CLUB_ID_TRANSLATIONS.keys())}]')
 
         team_id = self.CLUB_ID_TRANSLATIONS[team.lower()]
 
@@ -46,11 +47,12 @@ class PlayerStatsCog(commands.Cog):
     @commands.command(
         name="assists",
         help="Get highest goalscorers for a specific team, defaults to Arsenal.")
-    async def assists(self, ctx, competition: str = 'Premier League'):
+    async def assists(self, ctx, competition: str = 'pl'):
         if competition.lower() not in self.COMPETITION_TRANSLATIONS:
-            return await ctx.send(f'Sorry, I couldn\'t find a competition with the name {competition}')
+            return await ctx.send(f'Sorry, I couldn\'t find a competition with the name {competition}, '
+                                  f'allowed values are [{", ".join(name.upper() for name in self.COMPETITION_TRANSLATIONS.keys())}]')
 
-        competition_name = self.COMPETITION_TRANSLATIONS[competition]
+        competition_name = self.COMPETITION_TRANSLATIONS[competition.lower()]
 
         await ctx.send('```' + getAssists(competition_name) + '```')
 
