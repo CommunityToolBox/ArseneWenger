@@ -36,7 +36,7 @@ Get a random fact about our lord and savior Arsene Wenger.
 !unaifact
 Get a random fact about our former manager Unai Emery.
 !artetafact
-Get a random fact about our manager Mikael Arteta.
+Get a random fact about our manager Mikel Arteta.
 !fixtures
 Display the next 3 fixtures.
 !wengyboi <#>
