@@ -17,6 +17,12 @@ class FactsCog(commands.Cog):
         """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
+        self.MANAGER_IDS = {
+            'wenger': 51,
+            'unai': 37569,
+            'arteta': 51018
+        }
+
     @commands.command(
         name="wengersucks"
     )
@@ -58,10 +64,12 @@ class FactsCog(commands.Cog):
 
             line = random.choice(content)
             embed = discord.Embed(
-                title=f"{manager.title()} Fact",
                 description=line,
-                color=0xEF0107)
+                color=0x9C824A)
 
+            embed.set_author(
+                name=f"{manager.title()} Fact",
+                icon_url=f"https://resources.premierleague.com/premierleague/photos/players/250x250/man{self.MANAGER_IDS[manager]}.png")
             return embed
         except FileNotFoundError:
             print(f"{getTimestamp()}\nError reading file {facts}")
