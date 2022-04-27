@@ -31,7 +31,7 @@ class FixturesCog(commands.Cog):
         embed = discord.Embed(color=0x9C824A)
 
         embed.set_author(
-            name=f"Next {count} Fixtures",
+            name=f"Next {len(fixture_list)} Fixtures",
             icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
         )
 
@@ -209,8 +209,19 @@ def findFixtures(matches, number):
             date = matches[i].find("div",class_=False, id=False).text.split(' ')
             date = (date[0][:3] + " " + date[1]).split(',')[0]
             comp = matches[i].find("div",{"class","event-info__extra"}).text
-        team = match.find("span",{"class","team-crest__name-value"}).text
-        location = match.find("div",{"class","location-icon"})['title']
+        try:
+            team = match.find("span",{"class","team-crest__name-value"}).text
+        except AttributeError:
+            team = match.find("div",{"class","team-crest__name-value"}).text
+        try:
+            location = match.find("div",{"class","location-icon"})['title']
+        except TypeError:
+            teams = match.findAll("div",{"class","fixture-match__team"})
+            homeAway = getLocation(teams)
+            if homeAway == 0:
+                location = "Home"
+            else:
+                location = "Away"
         if location == "Home":
             team = team + " (H)"
         else:
