@@ -87,7 +87,11 @@ def getPlayerStats(club_id):
 
 
 def getGoalsScored(club):
-    df_topscorers = getPlayerStats(club).sort_values(by=['goals'], ascending=False, ignore_index=True).head(5)
+    df_topscorers = getPlayerStats(club)
+    df_topscorers['goals'] = pd.to_numeric(df_topscorers['goals'])
+    df_topscorers = df_topscorers.sort_values(['goals'], ascending=False).head(5)
+    #df_topscorers = df_topscorers['goals'].astype(int).sort_values(ascending=False).head(5)
+    # .sort_values(by=(['goals']), ascending=False, ignore_index=True) #.head(5)
     df_topscorers.index = df_topscorers.index + 1
     table = tabulate(df_topscorers, tablefmt='plain', colalign=['left', 'left'], showindex=False)
     return table
