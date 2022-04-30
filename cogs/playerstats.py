@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 import requests
 import re
 from tabulate import tabulate
-
+import discord
 from discord.ext import commands
 
 
@@ -20,10 +20,14 @@ class PlayerStatsCog(commands.Cog):
         self.bot = bot
 
         self.CLUB_ID_TRANSLATIONS = {
-            'arsenal': '18bb7c10',
-            'chelsea': 'cff3d9bb',
-            'spurs': '361ca564'
-        }
+            # 'team': ['club_id', 'icon_url']
+            'arsenal': ['18bb7c10', 'https://resources.premierleague.com/premierleague/badges/t3.png'],
+            'chelsea': ['cff3d9bb', 'https://resources.premierleague.com/premierleague/badges/t8.png'],
+            'spurs': ['361ca564', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/325/pile-of-poo_1f4a9.png'],
+            'united': ['0bbd83f6', 'https://resources.premierleague.com/premierleague/badges/t1.png'],
+            'brentford': ['cd051869', 'https://resources.premierleague.com/premierleague/badges/t94.png'],
+            'liverpool' : ['822bd0ba', 'https://resources.premierleague.com/premierleague/badges/t14.png']
+            }
 
         self.COMPETITION_TRANSLATIONS = {
             'pl': 'Premier League',
@@ -40,9 +44,19 @@ class PlayerStatsCog(commands.Cog):
             return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},'
                                   f'allowed values are [{", ".join(name.title() for name in self.CLUB_ID_TRANSLATIONS.keys())}]')
 
-        team_id = self.CLUB_ID_TRANSLATIONS[team.lower()]
+        team_id = self.CLUB_ID_TRANSLATIONS[team.lower()][0]
+        goals = getGoalsScored(team_id)
 
-        await ctx.send('```' + getGoalsScored(team_id) + '```')
+        embed = discord.Embed(
+            color=0x9C824A,
+            description=f"```{goals}```"
+        )
+        embed.set_author(
+            name=f"Top Goalscorers for {team.title()}",
+            icon_url=self.CLUB_ID_TRANSLATIONS[team.lower()][1]
+        )
+
+        await ctx.send(embed=embed)
 
     @commands.command(
         name="assists",
@@ -87,7 +101,9 @@ def getPlayerStats(club_id):
 
 
 def getGoalsScored(club):
-    df_topscorers = getPlayerStats(club).sort_values(by=['goals'], ascending=False, ignore_index=True).head(5)
+    df_topscorers = getPlayerStats(club)
+    df_topscorers['goals'] = pd.to_numeric(df_topscorers['goals'])
+    df_topscorers = df_topscorers.sort_values(['goals'], ascending=False).head(5)
     df_topscorers.index = df_topscorers.index + 1
     table = tabulate(df_topscorers, tablefmt='plain', colalign=['left', 'left'], showindex=False)
     return table
