@@ -40,7 +40,6 @@ def getSignings():
         season = "w"
     elif 5 <= currentDate.month <= 9:
         season = "s"
-        year += 1
     else:
         season = ""
     address = "https://www.transfermarkt.us/arsenal-fc/transfers/verein/11/plus/1?saison_id=" + str(
