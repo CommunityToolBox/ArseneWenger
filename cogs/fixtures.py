@@ -52,12 +52,32 @@ class FixturesCog(commands.Cog):
         """Returns how many days, hours, and minutes are left until the next fixture"""
         fixtures = parseFixtures()
         fixture = findFixtures(fixtures, 1)[0]
-        if (date.today()).month == 12 and "jan" in fixture.date.lower():
+        #if fixture date is in %d/%m/%Y format skip this step
+        if fixture.date.find("/"):
+            next_match_date = f"""{fixture.date} {fixture.time}"""
+        elif (date.today()).month == 12 and "jan" in fixture.date.lower():
             next_match_date = f"""{fixture.date} {date.today().year+1}  {fixture.time}"""
         else:
             next_match_date = f"""{fixture.date} {(date.today()).year}  {fixture.time}"""
 
-        date_object = datetime.strptime(next_match_date, '%b %d %Y %H:%M')
+        try:
+            date_object = datetime.strptime(next_match_date, '%b %d %Y %H:%M')
+        except ValueError:
+            #next_match_date: '08/07/2022 2022  4:30pm'
+            #convert to '08/07/2022 16:30'
+            time = next_match_date.split(" ")[-1]
+            if 'pm' in time:
+                #convert to 24 hour time
+                newtime = time.replace('pm', '')
+                newtime = newtime.replace(':', '')
+                newtime = int(newtime) + 1200
+                #re-add the colon
+                newtime = str(newtime)
+                newtime = newtime[:-2] + ":" + newtime[-2:]
+            
+            next_match_date = next_match_date.replace(time, newtime)
+            date_object = datetime.strptime(next_match_date, '%d/%m/%Y %H:%M')
+
         if bst_flag():
             delta = date_object - (datetime.utcnow() + timedelta(hours=1))
         else:
@@ -178,10 +198,28 @@ def findFixtures(matches, number):
     fixtures = []
     body = ""
     match = matches[0].find("div",{"class","fixture-match"})
-    date = matches[0].find("time").text
-    time = date.split('-')[1].strip()
-    date = date.split('-')[0][3:].strip()
-    comp = matches[0].find("div",{"class","event-info__extra"}).text
+    try:
+            date = matches[0].find("time").text
+            time = date.split('-')[1].strip()
+            date = date.split('-')[0][3:].strip()
+            comp = matches[0].find("div",{"class","event-info__extra"}).text
+    except:
+            try:
+                date = matches[0].find("div",{"class","event-info__date"}).text
+                #date: '\n08/07/2022 Kick Off at 4.30pm BST\n'
+                date = date.split('\n')[1].strip()
+                time = date.split(' Kick Off at ')[1].strip()
+                date = date.split(' Kick Off at ')[0].strip()
+                timezone = time.split(' ')[1].strip()
+                time = time.split(' ')[0].strip()
+                if '.' in time:
+                    time = time.replace('.',':')
+                comp = matches[0].find("div",{"class","event-info__extra"}).text
+            except:
+                time = "TBD"
+                date = matches[0].find("div",class_=False, id=False).text.split(' ')
+                date = (date[0][:3] + " " + date[1]).split(',')[0]
+                comp = matches[0].find("div",{"class","event-info__extra"}).text
     teams = match.findAll("div",{"class","fixture-match__team"})
     homeTeam = teams[0].find("div",{"class","team-crest__name-value"}).text
     awayTeam = teams[1].find("div",{"class","team-crest__name-value"}).text
@@ -205,10 +243,21 @@ def findFixtures(matches, number):
             date = date.split('-')[0][3:].strip()
             comp = matches[i].find("div",{"class","event-info__extra"}).text
         except:
-            time = "TBD"
-            date = matches[i].find("div",class_=False, id=False).text.split(' ')
-            date = (date[0][:3] + " " + date[1]).split(',')[0]
-            comp = matches[i].find("div",{"class","event-info__extra"}).text
+            try:
+                date = matches[i].find("div",{"class","event-info__date"}).text
+                #date: '\n08/07/2022 Kick Off at 4.30pm BST\n'
+                date = date.split('\n')[1].strip()
+                time = date.split(' ')[1].strip()
+                date = date.split(' ')[0].strip()
+                timezone = time.split(' ')[1].strip()
+                if '.' in time:
+                    time = time.replace('.',':')
+                comp = matches[i].find("div",{"class","event-info__extra"}).text
+            except:
+                time = "TBD"
+                date = matches[i].find("div",class_=False, id=False).text.split(' ')
+                date = (date[0][:3] + " " + date[1]).split(',')[0]
+                comp = matches[i].find("div",{"class","event-info__extra"}).text
         try:
             team = match.find("span",{"class","team-crest__name-value"}).text
         except AttributeError:
