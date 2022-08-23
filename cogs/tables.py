@@ -143,9 +143,9 @@ def shortenedClubNames(club):
         "Liverpool": "L'pool",
         "Fulham": "Fulham",
         "Nottingham Forest": "Forest",
-        "Bournemouth": "Bournemouth"
+        "Bournemouth" : "Bournemouth"
     }
-    return clublist[club]
+    return clublist[club] if club in clublist else club
 
 
 def livetable():
