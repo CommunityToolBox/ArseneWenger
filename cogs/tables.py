@@ -140,7 +140,10 @@ def shortenedClubNames(club):
         "Newcastle United": "Newcastle",
         "Norwich City": "Norwich",
         "Brentford": "Brentford",
-        "Liverpool": "L'pool"
+        "Liverpool": "L'pool",
+        "Fulham": "Fulham",
+        "Nottingham Forest": "Forest",
+        "Bournemouth": "Bournemouth"
     }
     return clublist[club]
 
