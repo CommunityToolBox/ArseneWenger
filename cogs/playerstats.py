@@ -3,6 +3,7 @@
 """
 A cog to give interesting player facts
 """
+from inspect import Attribute
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -21,12 +22,26 @@ class PlayerStatsCog(commands.Cog):
 
         self.CLUB_ID_TRANSLATIONS = {
             # 'team': ['club_id', 'icon_url']
-            'arsenal': ['18bb7c10', 'https://resources.premierleague.com/premierleague/badges/t3.png'],
-            'chelsea': ['cff3d9bb', 'https://resources.premierleague.com/premierleague/badges/t8.png'],
+            'arsenal': ['18bb7c10', 'https://resources.premierleague.com/premierleague/badges/50/t3.png'],
+            'chelsea': ['cff3d9bb', 'https://resources.premierleague.com/premierleague/badges/50/t8.png'],
             'spurs': ['361ca564', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/325/pile-of-poo_1f4a9.png'],
-            'united': ['0bbd83f6', 'https://resources.premierleague.com/premierleague/badges/t1.png'],
-            'brentford': ['cd051869', 'https://resources.premierleague.com/premierleague/badges/t94.png'],
-            'liverpool' : ['822bd0ba', 'https://resources.premierleague.com/premierleague/badges/t14.png']
+            'united': ['19538871', 'https://resources.premierleague.com/premierleague/badges/50/t1.png'],
+            'brentford': ['cd051869', 'https://resources.premierleague.com/premierleague/badges/50/t94.png'],
+            'liverpool' : ['822bd0ba', 'https://resources.premierleague.com/premierleague/badges/50/t14.png'],
+            'city': ['b8fd03ef', 'https://resources.premierleague.com/premierleague/badges/50/t43.png'],
+            'brighton': ['d07537b9', 'https://resources.premierleague.com/premierleague/badges/50/t36.png'],
+            'leeds': ['5bfb9659', 'https://resources.premierleague.com/premierleague/badges/50/t2.png'],
+            'fulham': ['fd962109', 'https://resources.premierleague.com/premierleague/badges/50/t54.png'],
+            'newcastle': ['b2b47a98', 'https://resources.premierleague.com/premierleague/badges/50/t4.png'],
+            'southampton': ['33c895d4', 'https://resources.premierleague.com/premierleague/badges/50/t20.png'],
+            'bournemouth': ['4ba7cbea', 'https://resources.premierleague.com/premierleague/badges/50/t91.png'],
+            'wolves': ['8cec06e1', 'https://resources.premierleague.com/premierleague/badges/50/t39.png'],
+            'palace': ['47c64c55', 'https://resources.premierleague.com/premierleague/badges/50/t31.png'],
+            'everton': ['d3fd31cc', 'https://resources.premierleague.com/premierleague/badges/50/t11.png'],
+            'villa': ['8602292d', 'https://resources.premierleague.com/premierleague/badges/50/t7.png'],
+            'west ham': ['7c21e445', 'https://resources.premierleague.com/premierleague/badges/50/t21.png'],
+            'forest': ['e4a775cb', 'https://resources.premierleague.com/premierleague/badges/50/t17.png'],
+            'leicester': ['a2d435b3', 'https://resources.premierleague.com/premierleague/badges/50/t13.png']
             }
 
         self.COMPETITION_TRANSLATIONS = {
@@ -41,11 +56,15 @@ class PlayerStatsCog(commands.Cog):
         help="Get highest goalscorers for a specific team, defaults to Arsenal.")
     async def goals(self, ctx, team: str = 'Arsenal'):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
-            return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},'
+            return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},\n'
+                                  f'If your team has a space in the middle, wrap the team in quotes(ie: "west ham")\n'
                                   f'allowed values are [{", ".join(name.title() for name in self.CLUB_ID_TRANSLATIONS.keys())}]')
 
         team_id = self.CLUB_ID_TRANSLATIONS[team.lower()][0]
-        goals = getGoalsScored(team_id)
+        try:
+            goals = getGoalsScored(team_id)
+        except AttributeError: 
+            goals = f"could not find goals for {team}"
 
         embed = discord.Embed(
             color=0x9C824A,
@@ -55,7 +74,6 @@ class PlayerStatsCog(commands.Cog):
             name=f"Top Goalscorers for {team.title()}",
             icon_url=self.CLUB_ID_TRANSLATIONS[team.lower()][1]
         )
-
         await ctx.send(embed=embed)
 
     @commands.command(
@@ -74,7 +92,9 @@ class PlayerStatsCog(commands.Cog):
         name="injuries",
         help="Get the list of injuries and details about them")
     async def injuries(self, ctx, team: str = 'Arsenal'):
-        injuries = getInjuries()
+        if team != "Arsenal":
+            return await ctx.send("Sorry, currently only Arsenal injuries can be seen.  Stay tuned for other teams")
+        injuries = getInjuries(team)
         embed = discord.Embed(
             color=0x9C824A,
             title=f"Injuries for {team.title()}"
@@ -161,7 +181,6 @@ def getInjuries(team="Arsenal"):
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
         "X-Requested-With": "XMLHttpRequest"
     }
-    playerDict = {"Player": "", "Reason": "", "FurtherDetail": "", "PotentialReturn": "", "Condition": "", "Status": ""}
     injuries = []
     r = requests.get(tableurl).text
     bs_obj = BeautifulSoup(r, features="lxml")
@@ -175,24 +194,18 @@ def getInjuries(team="Arsenal"):
         plObj = plObj.split('\n')
         plObj.pop(0)
         player = plObj.pop(0)
-        player = player.rsplit("Player")[-1]
-        playerDict["Player"] = player
+        playerDict["Player"] = player.rsplit("Player")[-1]
         reason = plObj.pop(0)
-        reason = reason.rsplit("Reason")[-1]
-        playerDict["Reason"] = reason
+        playerDict["Reason"] = reason.rsplit("Reason")[-1]
         furtherDetail = plObj.pop(0)
-        furtherDetail = furtherDetail.rsplit("Further Detail")[-1]
-        playerDict["FurtherDetail"] = furtherDetail
+        playerDict["FurtherDetail"] = furtherDetail.rsplit("Further Detail")[-1]
         potentialReturn = plObj.pop(0)
         # dates are in dd/mm/yyyy, AKA the correct way :D
-        potentialReturn = potentialReturn.rsplit("Potential Return")[-1]
-        playerDict["PotentialReturn"] = potentialReturn
+        playerDict["PotentialReturn"] = potentialReturn.rsplit("Potential Return")[-1]
         condition = plObj.pop(0)
-        condition = condition.rsplit("Condition")[-1]
-        playerDict["Condition"] = condition
+        playerDict["Condition"] = condition.rsplit("Condition")[-1]
         status = plObj.pop(0)
-        status = status.rsplit("Status")[-1]
-        playerDict["Status"] = status
+        playerDict["Status"] = status.rsplit("Status")[-1]
         injuries += [playerDict]
     return injuries
     
