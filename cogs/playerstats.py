@@ -58,7 +58,6 @@ class PlayerStatsCog(commands.Cog):
     async def goals(self, ctx, *, team: str = 'Arsenal'):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
             return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},\n'
-                                  f'If your team has a space in the middle, wrap the team in quotes(ie: "west ham")\n'
                                   f'allowed values are [{", ".join(name.title() for name in self.CLUB_ID_TRANSLATIONS.keys())}]')
 
         team_id = self.CLUB_ID_TRANSLATIONS[team.lower()][0]
