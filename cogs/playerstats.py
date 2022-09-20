@@ -11,6 +11,7 @@ import re
 from tabulate import tabulate
 import discord
 from discord.ext import commands
+from datetime import datetime
 
 
 class PlayerStatsCog(commands.Cog):
@@ -54,7 +55,7 @@ class PlayerStatsCog(commands.Cog):
     @commands.command(
         name="goals",
         help="Get highest goalscorers for a specific team, defaults to Arsenal.")
-    async def goals(self, ctx, team: str = 'Arsenal'):
+    async def goals(self, ctx, *, team: str = 'Arsenal'):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
             return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},\n'
                                   f'If your team has a space in the middle, wrap the team in quotes(ie: "west ham")\n'
@@ -201,7 +202,12 @@ def getInjuries(team="Arsenal"):
         playerDict["FurtherDetail"] = furtherDetail.rsplit("Further Detail")[-1]
         potentialReturn = plObj.pop(0)
         # dates are in dd/mm/yyyy, AKA the correct way :D
-        playerDict["PotentialReturn"] = potentialReturn.rsplit("Potential Return")[-1]
+        returnDate = potentialReturn.rsplit("Potential Return")[-1]
+        if returnDate != "No Return Date":
+            returnDate = datetime.strptime(returnDate, '%d/%m/%Y')
+            playerDict["PotentialReturn"] = returnDate.strftime("%d-%B-%Y")
+        else:
+            playerDict["PotentialReturn"] = returnDate
         condition = plObj.pop(0)
         playerDict["Condition"] = condition.rsplit("Condition")[-1]
         status = plObj.pop(0)
