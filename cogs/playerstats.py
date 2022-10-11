@@ -3,13 +3,15 @@
 """
 A cog to give interesting player facts
 """
+from inspect import Attribute
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 import re
 from tabulate import tabulate
-
+import discord
 from discord.ext import commands
+from datetime import datetime
 
 
 class PlayerStatsCog(commands.Cog):
@@ -20,10 +22,28 @@ class PlayerStatsCog(commands.Cog):
         self.bot = bot
 
         self.CLUB_ID_TRANSLATIONS = {
-            'arsenal': '18bb7c10',
-            'chelsea': 'cff3d9bb',
-            'spurs': '361ca564'
-        }
+            # 'team': ['club_id', 'icon_url']
+            'arsenal': ['18bb7c10', 'https://resources.premierleague.com/premierleague/badges/50/t3.png'],
+            'chelsea': ['cff3d9bb', 'https://resources.premierleague.com/premierleague/badges/50/t8.png'],
+            'spurs': ['361ca564', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/325/pile-of-poo_1f4a9.png'],
+            'united': ['19538871', 'https://resources.premierleague.com/premierleague/badges/50/t1.png'],
+            'brentford': ['cd051869', 'https://resources.premierleague.com/premierleague/badges/50/t94.png'],
+            'liverpool' : ['822bd0ba', 'https://resources.premierleague.com/premierleague/badges/50/t14.png'],
+            'city': ['b8fd03ef', 'https://resources.premierleague.com/premierleague/badges/50/t43.png'],
+            'brighton': ['d07537b9', 'https://resources.premierleague.com/premierleague/badges/50/t36.png'],
+            'leeds': ['5bfb9659', 'https://resources.premierleague.com/premierleague/badges/50/t2.png'],
+            'fulham': ['fd962109', 'https://resources.premierleague.com/premierleague/badges/50/t54.png'],
+            'newcastle': ['b2b47a98', 'https://resources.premierleague.com/premierleague/badges/50/t4.png'],
+            'southampton': ['33c895d4', 'https://resources.premierleague.com/premierleague/badges/50/t20.png'],
+            'bournemouth': ['4ba7cbea', 'https://resources.premierleague.com/premierleague/badges/50/t91.png'],
+            'wolves': ['8cec06e1', 'https://resources.premierleague.com/premierleague/badges/50/t39.png'],
+            'palace': ['47c64c55', 'https://resources.premierleague.com/premierleague/badges/50/t31.png'],
+            'everton': ['d3fd31cc', 'https://resources.premierleague.com/premierleague/badges/50/t11.png'],
+            'villa': ['8602292d', 'https://resources.premierleague.com/premierleague/badges/50/t7.png'],
+            'west ham': ['7c21e445', 'https://resources.premierleague.com/premierleague/badges/50/t21.png'],
+            'forest': ['e4a775cb', 'https://resources.premierleague.com/premierleague/badges/50/t17.png'],
+            'leicester': ['a2d435b3', 'https://resources.premierleague.com/premierleague/badges/50/t13.png']
+            }
 
         self.COMPETITION_TRANSLATIONS = {
             'pl': 'Premier League',
@@ -35,25 +55,54 @@ class PlayerStatsCog(commands.Cog):
     @commands.command(
         name="goals",
         help="Get highest goalscorers for a specific team, defaults to Arsenal.")
-    async def goals(self, ctx, team: str = 'Arsenal'):
+    async def goals(self, ctx, *, team: str = 'Arsenal'):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
-            return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team}')
+            return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},\n'
+                                  f'allowed values are [{", ".join(name.title() for name in self.CLUB_ID_TRANSLATIONS.keys())}]')
 
-        team_id = self.CLUB_ID_TRANSLATIONS[team.lower()]
+        team_id = self.CLUB_ID_TRANSLATIONS[team.lower()][0]
+        try:
+            goals = getGoalsScored(team_id)
+        except AttributeError: 
+            goals = f"could not find goals for {team}"
 
-        await ctx.send('```' + getGoalsScored(team_id) + '```')
+        embed = discord.Embed(
+            color=0x9C824A,
+            description=f"```{goals}```"
+        )
+        embed.set_author(
+            name=f"Top Goalscorers for {team.title()}",
+            icon_url=self.CLUB_ID_TRANSLATIONS[team.lower()][1]
+        )
+        await ctx.send(embed=embed)
 
     @commands.command(
         name="assists",
         help="Get highest goalscorers for a specific team, defaults to Arsenal.")
-    async def assists(self, ctx, competition: str = 'Premier League'):
+    async def assists(self, ctx, competition: str = 'pl'):
         if competition.lower() not in self.COMPETITION_TRANSLATIONS:
-            return await ctx.send(f'Sorry, I couldn\'t find a competition with the name {competition}')
+            return await ctx.send(f'Sorry, I couldn\'t find a competition with the name {competition}, '
+                                  f'allowed values are [{", ".join(name.upper() for name in self.COMPETITION_TRANSLATIONS.keys())}]')
 
-        competition_name = self.COMPETITION_TRANSLATIONS[competition]
+        competition_name = self.COMPETITION_TRANSLATIONS[competition.lower()]
 
         await ctx.send('```' + getAssists(competition_name) + '```')
-
+    
+    @commands.command(
+        name="injuries",
+        help="Get the list of injuries and details about them")
+    async def injuries(self, ctx, team: str = 'Arsenal'):
+        if team != "Arsenal":
+            return await ctx.send("Sorry, currently only Arsenal injuries can be seen.  Stay tuned for other teams")
+        injuries = getInjuries(team)
+        embed = discord.Embed(
+            color=0x9C824A,
+            title=f"Injuries for {team.title()}"
+        )
+        for i in injuries:
+            embed.add_field(name=f'**{i["Player"]}**', value=f"> Reason: *{i['Reason']}*\n> Further Detail: *{i['FurtherDetail']}*\n> Potential Return: *{i['PotentialReturn']}*\n> Condition: *{i['Condition']}*\n> Status: *{i['Status']}*", inline=False)
+        
+        await ctx.send(embed=embed)
 
 def getPlayerStats(club_id):
     top_scorer = dict()
@@ -85,7 +134,9 @@ def getPlayerStats(club_id):
 
 
 def getGoalsScored(club):
-    df_topscorers = getPlayerStats(club).sort_values(by=['goals'], ascending=False, ignore_index=True).head(5)
+    df_topscorers = getPlayerStats(club)
+    df_topscorers['goals'] = pd.to_numeric(df_topscorers['goals'])
+    df_topscorers = df_topscorers.sort_values(['goals'], ascending=False).head(5)
     df_topscorers.index = df_topscorers.index + 1
     table = tabulate(df_topscorers, tablefmt='plain', colalign=['left', 'left'], showindex=False)
     return table
@@ -122,6 +173,46 @@ def getAssists(comp):
     table = 'Assist Stats: ' + comp + '\n' + table
     return table
 
+def getInjuries(team="Arsenal"):
+    tableurl = "https://www.premierinjuries.com/injury-table.php"
+    #get table and convert to dataframe
+    header = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
+        "X-Requested-With": "XMLHttpRequest"
+    }
+    injuries = []
+    r = requests.get(tableurl).text
+    bs_obj = BeautifulSoup(r, features="lxml")
+    #currently team_1 is arsenal, but ideally i'd like to have some sort of error-checky way
+    # to make sure that it looks for arsenal and confirms that the team ID is 1.  
+    #i'll let future ren figure that out
+    fullTable = bs_obj.find_all('tr', attrs={'class': "player-row team_1"})
+    playerList = [i.text for i in fullTable]
+    for plObj in playerList:
+        playerDict = {"Player": "", "Reason": "", "FurtherDetail": "", "PotentialReturn": "", "Condition": "", "Status": ""}
+        plObj = plObj.split('\n')
+        plObj.pop(0)
+        player = plObj.pop(0)
+        playerDict["Player"] = player.rsplit("Player")[-1]
+        reason = plObj.pop(0)
+        playerDict["Reason"] = reason.rsplit("Reason")[-1]
+        furtherDetail = plObj.pop(0)
+        playerDict["FurtherDetail"] = furtherDetail.rsplit("Further Detail")[-1]
+        potentialReturn = plObj.pop(0)
+        # dates are in dd/mm/yyyy, AKA the correct way :D
+        returnDate = potentialReturn.rsplit("Potential Return")[-1]
+        if returnDate != "No Return Date":
+            returnDate = datetime.strptime(returnDate, '%d/%m/%Y')
+            playerDict["PotentialReturn"] = returnDate.strftime("%d-%B-%Y")
+        else:
+            playerDict["PotentialReturn"] = returnDate
+        condition = plObj.pop(0)
+        playerDict["Condition"] = condition.rsplit("Condition")[-1]
+        status = plObj.pop(0)
+        playerDict["Status"] = status.rsplit("Status")[-1]
+        injuries += [playerDict]
+    return injuries
+    
 
 def setup(bot):
     """

@@ -16,7 +16,7 @@ class MemeCog(commands.Cog):
         self.bot = bot
 
     @commands.command(
-        name="makewenger",
+        name="wengyboi",
         help="Make a wengyboi of # length! Max 10.")
     async def makewneger(self, ctx, length: int = 1):
         length = clamp_int(length, 1, 10)

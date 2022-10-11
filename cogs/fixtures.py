@@ -3,6 +3,7 @@
 """
 A cog with useful commands around fixtures
 """
+import discord
 import requests, requests.auth
 from bs4 import BeautifulSoup
 from fotmob import fotmob
@@ -19,30 +20,77 @@ class FixturesCog(commands.Cog):
         self.bot = bot
 
     @commands.command(
-        name="fixture",
-        aliases=("fixtures", ),
+        name="fixtures",
+        aliases=("fixture", ),
         help="Display the next N fixtures, default 3, max 10.")
-    async def fixture(self, ctx, count: int = 3):
+    async def fixtures(self, ctx, count: int = 3):
         count = clamp_int(count, 1, 10)
         fixtures = parseFixtures()
-        body = findFixtures(fixtures, count)
-        await ctx.send(f"```{body}```")
+        fixture_list = findFixtures(fixtures, count)
+
+        embed = discord.Embed(color=0x9C824A)
+
+        embed.set_author(
+            name=f"Next {len(fixture_list)} Fixtures",
+            icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
+        )
+
+        for fixture in fixture_list:
+            embed.add_field(
+                name=f"{fixture.team} - {fixture.comp}",
+                value=f"{fixture.time} - {fixture.date}",
+                inline=False
+            )
+
+        await ctx.send(embed=embed)
 
     @commands.command(
         name="next",
         help="Display the time between now in utc and the next match."
     )
     async def next(self, ctx):
-        body = nextFixture()
-        await ctx.send(f"```{body}```")
+        """Returns how many days, hours, and minutes are left until the next fixture"""
+        fixtures = parseFixtures()
+        fixture = findFixtures(fixtures, 1)[0]
+        if (date.today()).month == 12 and "jan" in fixture.date.lower():
+            next_match_date = f"""{fixture.date} {date.today().year+1}  {fixture.time}"""
+        else:
+            next_match_date = f"""{fixture.date} {(date.today()).year}  {fixture.time}"""
+
+        date_object = datetime.strptime(next_match_date, '%b %d %Y %H:%M')
+        if bst_flag():
+            delta = date_object - (datetime.utcnow() + timedelta(hours=1))
+        else:
+            delta = date_object - datetime.utcnow()
+
+        if delta.days > 0:
+            response = f"Next match is {fixture.team} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+        elif delta.days == 0:
+            response = f"Next match is {fixture.team} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+        else:
+            channel = discord.utils.get(ctx.guild.text_channels, name="live-games")
+            response = f"There is a match playing right now! head over to <#{channel.id}>"
+
+        embed = discord.Embed(
+            color=0x9C824A,
+            description=response
+        )
+
+        embed.set_author(
+            name=f"Next Game",
+            icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
+        )
+
+        await ctx.send(embed=embed)
 
     @commands.command(
-        name="result",
-        aliases=("results", ),
+        name="results",
+        aliases=("result", ),
         help="Show recent results"
     )
-    async def result(self, ctx):
-        body = discordResults()
+    async def results(self, ctx):
+        fixtures = parseResults()
+        body = findResults(fixtures)
         await ctx.send(f"```{body}```")
 
     @commands.command(
@@ -78,19 +126,14 @@ class FixturesCog(commands.Cog):
 
 i = 0
 
-class Match(object):
-    date = ""
-    homeTeam = ""
-    awayTeam = ""
-    timeResult = ""
-    comp = ""
 
-    def __init__(self,date,homeTeam,awayTeam,timeResult,comp):
+class Match:
+    def __init__(self, date, time, team, comp):
         self.date = date
-        self.homeTeam = homeTeam
-        self.awayTeam = awayTeam
-        self.timeResult = timeResult
+        self.time = time
+        self.team = team
         self.comp = comp
+
 
 def getLocation(line):
     homeTeam = line[0].text.strip()
@@ -98,6 +141,7 @@ def getLocation(line):
         return 0
     else:
         return 1
+
 
 def bst_flag():
     """returns true if we are in bst"""
@@ -131,6 +175,7 @@ def parseResults():
     return matches
 
 def findFixtures(matches, number):
+    fixtures = []
     body = ""
     match = matches[0].find("div",{"class","fixture-match"})
     date = matches[0].find("time").text
@@ -145,7 +190,7 @@ def findFixtures(matches, number):
         team = awayTeam + " (H)"
     else:
         team = homeTeam + " (A)"
-    body += "| " + date + " | " + time + " | " + team +" | " +comp+" |\n"
+    fixtures.append(Match(date, time, team, comp))
     if number == 0 or number > 10:
         x = 3
     else:
@@ -164,14 +209,25 @@ def findFixtures(matches, number):
             date = matches[i].find("div",class_=False, id=False).text.split(' ')
             date = (date[0][:3] + " " + date[1]).split(',')[0]
             comp = matches[i].find("div",{"class","event-info__extra"}).text
-        team = match.find("span",{"class","team-crest__name-value"}).text
-        location = match.find("div",{"class","location-icon"})['title']
+        try:
+            team = match.find("span",{"class","team-crest__name-value"}).text
+        except AttributeError:
+            team = match.find("div",{"class","team-crest__name-value"}).text
+        try:
+            location = match.find("div",{"class","location-icon"})['title']
+        except TypeError:
+            teams = match.findAll("div",{"class","fixture-match__team"})
+            homeAway = getLocation(teams)
+            if homeAway == 0:
+                location = "Home"
+            else:
+                location = "Away"
         if location == "Home":
             team = team + " (H)"
         else:
-            team = team+ " (A)"
-        body += "| " + date + " | " + time + " | " + team + " | " +comp+" |\n"
-    return body
+            team = team + " (A)"
+        fixtures.append(Match(date, time, team, comp))
+    return fixtures
 
 
 def findResults(matches):
@@ -273,38 +329,6 @@ def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally writte
             body += match.getResult() + " | "
         body += match.getHomeTeam() + " v " + match.getAwayTeam() + "\n"
     return body
-
-def discordResults():
-    fixtures = parseResults()
-    body = findResults(fixtures)
-    return body
-
-def nextFixture():
-    """Returns how many days, hours, and minutes are left until the next fixture"""
-    fixtures = parseFixtures()
-    body = findFixtures(fixtures, 1)
-    splitBod = body.split("|")
-    if (date.today()).month == 12 and "jan" in (splitBod[1]).lower():
-        nextMatchDate = f"""{((splitBod[1]).strip())} {((date.today()).year)+1}  {(splitBod[2]).strip()}"""
-    else:
-        nextMatchDate = f"""{((splitBod[1]).strip())} {(date.today()).year}  {(splitBod[2]).strip()}"""
-
-    opponentInfo = f"""{(splitBod[3]).strip()}"""
-
-    dateObject = dateObject = datetime.strptime(nextMatchDate, '%b %d %Y %H:%M')
-    if (bst_flag()):
-        delta = dateObject - (datetime.utcnow() + timedelta(hours=1))
-    else:
-        delta = dateObject - datetime.utcnow()
-
-    if delta.days > 0:
-        response = f"Next match is {opponentInfo} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
-    elif delta.days == 0:
-        response = f"Next match is {opponentInfo} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
-    else:
-        response = f"There is a match playing right now! head over to #live-games"
-    return response
-
 
 
 def setup(bot):
