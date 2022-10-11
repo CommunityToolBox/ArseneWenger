@@ -58,7 +58,7 @@ class PlayerStatsCog(commands.Cog):
 def getPlayerStats(club_id):
     top_scorer = dict()
     metrics_wanted = {"goals"}  # Can be expanded to other metrics like assists, minutes played etc
-    page = requests.get(f'https://fbref.com/en/squads/{club_id}')  # TODO: add a config file and store club->id mapping
+    page = requests.get(f'https://fbref.com/en/squads/{club_id}')
     comm = re.compile("<!--|-->")
     soup = BeautifulSoup(comm.sub("", page.text), 'lxml')
     all_tables = soup.findAll("tbody")
@@ -92,8 +92,7 @@ def getGoalsScored(club):
 
 
 def getAssists(comp):
-    tableurl = "https://fbref.com/en/squads/18bb7c10/2021-2022/all_comps/Arsenal-Stats-All-Competitions"
-
+    tableurl = "https://fbref.com/en/squads/18bb7c10/2022-2023/all_comps/Arsenal-Stats-All-Competitions"
     # Get table and convert to Dataframe
     x1 = requests.get(tableurl, stream=True)
     x2 = ""
