@@ -10,7 +10,7 @@ from utils import getTimestamp
 
 prefix = '!'
 bot = commands.Bot(
-    command_prefix='!',
+    command_prefix=prefix,
     case_insensitive=True
 )
 
