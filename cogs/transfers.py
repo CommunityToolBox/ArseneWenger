@@ -36,6 +36,8 @@ def getSignings():
     transfers = []
     currentDate = date.today()
     year = currentDate.year
+    if currentDate.month < 5:
+        year -= 1
     if currentDate.month <= 2:
         season = "w"
     elif 5 <= currentDate.month <= 9:
@@ -49,10 +51,14 @@ def getSignings():
     soup = soup.findAll("div", {"class": "box"})[2]
     table = soup.find("div", {"class": "responsive-table"})
     table = table.find("tbody")
+    status = ""
     if table is None:
         return ["None"]
     for row in table.findAll("tr", {"class": ['odd', 'even']}):
-        status = row.find("td", {"class": "rechts hauptlink"}).find_all('a', href=True)[0].getText()
+        try:
+            status = row.find("td", {"class": "rechts hauptlink"}).find_all('a', href=True)[0].getText()
+        except AttributeError:
+            print("blank row")
         if "End of loan" not in status:
             transfers.append(row.find("td", {"class": "hauptlink"}).find_all('a', href=True)[0].getText())
     return transfers
