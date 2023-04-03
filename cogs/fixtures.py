@@ -91,7 +91,17 @@ class FixturesCog(commands.Cog):
     async def results(self, ctx):
         fixtures = parseResults()
         body = findResults(fixtures)
-        await ctx.send(f"```{body}```")
+
+        embed = discord.Embed(
+            color=0x9C824A,
+            description=f"```{body}```")
+
+        embed.set_author(
+            name="Last 3  results",
+            icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
+        )
+
+        await ctx.send(embed=embed)
 
     @commands.command(
         name="euro",
