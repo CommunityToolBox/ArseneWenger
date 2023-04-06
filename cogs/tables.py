@@ -25,8 +25,11 @@ class Tables(commands.Cog):
         # Check if (w)hite or (l)ight, else use dark mode
         light_mode = background.startswith('l') or background.startswith('w')
 
-        bg_colour = (255, 255, 255) if light_mode else (47, 49, 54)
-        font_colour = (0, 0, 0) if light_mode else (255, 255, 255)
+        if (light_mode):
+            return await ctx.send(f"Light mode is not allowed, you spud.")
+
+        bg_colour = (47, 49, 54)
+        font_colour = (255, 255, 255)
 
         img = Image.new('RGB', (1130, 840), bg_colour)
         d = ImageDraw.Draw(img)
