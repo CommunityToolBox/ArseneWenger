@@ -97,7 +97,7 @@ class FixturesCog(commands.Cog):
             description=f"```{body}```")
 
         embed.set_author(
-            name="Last 3  results",
+            name="Last 3 results",
             icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
         )
 
