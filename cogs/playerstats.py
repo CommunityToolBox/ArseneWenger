@@ -25,7 +25,7 @@ class PlayerStatsCog(commands.Cog):
             # 'team': ['club_id', 'icon_url']
             'arsenal': ['18bb7c10', 'https://resources.premierleague.com/premierleague/badges/50/t3.png'],
             'chelsea': ['cff3d9bb', 'https://resources.premierleague.com/premierleague/badges/50/t8.png'],
-            'spurs': ['361ca564', 'https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/325/pile-of-poo_1f4a9.png'],
+            'spurs': ['361ca564', 'https://em-content.zobj.net/thumbs/120/twitter/322/pile-of-poo_1f4a9.png'],
             'united': ['19538871', 'https://resources.premierleague.com/premierleague/badges/50/t1.png'],
             'brentford': ['cd051869', 'https://resources.premierleague.com/premierleague/badges/50/t94.png'],
             'liverpool' : ['822bd0ba', 'https://resources.premierleague.com/premierleague/badges/50/t14.png'],
@@ -85,8 +85,17 @@ class PlayerStatsCog(commands.Cog):
                                   f'allowed values are [{", ".join(name.upper() for name in self.COMPETITION_TRANSLATIONS.keys())}]')
 
         competition_name = self.COMPETITION_TRANSLATIONS[competition.lower()]
+        assists = getAssists(competition_name)
+        embed = discord.Embed(
+            color=0x9C824A,
+            description=f"```{assists}```"
+        )
+        embed.set_author(
+            name=f"Top assists for Arsenal",
+            icon_url=self.CLUB_ID_TRANSLATIONS['arsenal'][1]
+        )
 
-        await ctx.send('```' + getAssists(competition_name) + '```')
+        await ctx.send(embed=embed)
     
     @commands.command(
         name="injuries",
@@ -136,7 +145,7 @@ def getPlayerStats(club_id):
 def getGoalsScored(club):
     df_topscorers = getPlayerStats(club)
     df_topscorers['goals'] = pd.to_numeric(df_topscorers['goals'])
-    df_topscorers = df_topscorers.sort_values(['goals'], ascending=False).head(5)
+    df_topscorers = df_topscorers.sort_values(['goals'], ascending=False).head(10)
     df_topscorers.index = df_topscorers.index + 1
     table = tabulate(df_topscorers, tablefmt='plain', colalign=['left', 'left'], showindex=False)
     return table
@@ -144,7 +153,6 @@ def getGoalsScored(club):
 
 def getAssists(comp):
     tableurl = "https://fbref.com/en/squads/18bb7c10/2022-2023/all_comps/Arsenal-Stats-All-Competitions"
-    # Get table and convert to Dataframe
     x1 = requests.get(tableurl, stream=True)
     x2 = ""
     ind = False
@@ -152,25 +160,18 @@ def getAssists(comp):
         lines_d = lines.decode('utf-8')
         if "div_stats_player_summary" in lines_d:
             ind = True
-
         if ind:
             x2 = x2 + lines_d
-
         if "tfooter_stats_player_summary" in lines_d:
             break
 
     tableslist = pd.read_html(x2)[0]
-    # End
-
-    sorted_table = tableslist.sort_values([(comp, 'Ast')],
-                                          ascending=False)  # Table containing all stats and assists in desc order
-    sub_table = sorted_table[[('Unnamed: 0_level_0', 'Player'), (comp, 'Ast')]].to_numpy().tolist()[
-                0:5]  # List containing only top 5 assists in desc order
+    sorted_table = tableslist.sort_values([(comp, 'Ast')], ascending=False)
+    sub_table = sorted_table[[('Unnamed: 0_level_0', 'Player'), (comp, 'Ast')]].to_numpy().tolist()[0:10]
     for i in sub_table:
         i[1] = int(i[1])
     tabulate.PRESERVE_WHITESPACE = False
-    table = tabulate(sub_table, headers=['Player', 'Ast'], tablefmt='pretty', colalign=('right', 'left',))
-    table = 'Assist Stats: ' + comp + '\n' + table
+    table = tabulate(sub_table, tablefmt='plain', colalign=('left', 'right',))
     return table
 
 def getInjuries(team="Arsenal"):
