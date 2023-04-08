@@ -1,5 +1,5 @@
 discord==1.7.3
-discord.py==1.7.3
+discord.py==2.2.2
 bs4==0.0.1
 datetime==4.3
 tabulate==0.8.9
