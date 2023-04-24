@@ -52,7 +52,10 @@ class PlayerStatsCog(commands.Cog):
             'efl': 'EFL Cup'
         }
 
-    @app_commands.command()
+    @app_commands.command(
+        name="goals",
+        description="Get highest goalscorers for a specific team, defaults to Arsenal."
+    )
     async def goals(self, interaction: discord.Interaction, team: str = 'Arsenal'):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
             return await interaction.response.send_message(f'Sorry, I couldn\'t find a team with the name {team},\n'
@@ -74,7 +77,10 @@ class PlayerStatsCog(commands.Cog):
         )
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command()
+    @app_commands.command(
+        name="assists",
+        description="Get highest goalscorers for a specific team, defaults to Arsenal."
+    )
     async def assists(self, interaction: discord.Interaction, competition: str = 'pl'):
         if competition.lower() not in self.COMPETITION_TRANSLATIONS:
             return await interaction.response.send_message(f'Sorry, I couldn\'t find a competition with the name {competition}, '
@@ -93,7 +99,10 @@ class PlayerStatsCog(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
     
-    @app_commands.command()
+    @app_commands.command(
+        name="injuries",
+        description="Get the list of injuries and details about them"
+    )
     async def injuries(self, interaction: discord.Interaction, team: str = 'Arsenal'):
         if team != "Arsenal":
             return await interaction.response.send_message("Sorry, currently only Arsenal injuries can be seen.  Stay tuned for other teams")

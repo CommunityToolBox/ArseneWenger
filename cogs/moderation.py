@@ -4,7 +4,7 @@
 A moderation cog to automate deletion and moderation of messages
 """
 from discord.ext import commands
-
+from discord import app_commands
 
 class ModerationCog(commands.Cog):
     """The ping to your pong"""

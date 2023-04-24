@@ -5,8 +5,11 @@ A cog to get transfers
 """
 
 from datetime import date
-from bs4 import BeautifulSoup
+
+import discord
 import requests
+from bs4 import BeautifulSoup
+from discord import app_commands
 from discord.ext import commands
 
 
@@ -16,17 +19,18 @@ class TransfersCogs(commands.Cog):
         """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
-    @commands.command(
+    @app_commands.command(
         name="anysignings",
-        help="Get Arsenal signings for the current transfer window/season")
-    async def signings(self, ctx):
+        description="Get Arsenal signings for the current transfer window/season"
+    )
+    async def signings(self, interaction: discord.Interaction):
         players = ""
         if "None" not in getSignings():
             for name in getSignings():
                 players += name + "\n"
         else:
             players = "Fuck All"
-        await ctx.send(players)
+        await interaction.response.send_message(players)
 
 
 def getSignings():

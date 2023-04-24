@@ -1,24 +1,26 @@
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 import re
-import requests
-import requests.auth
 
 import discord
 import pandas as pd
+import requests
+import requests.auth
 import tabulate
 from PIL import Image, ImageDraw, ImageFont
+from discord import app_commands
 from discord.ext import commands
+
 
 class Tables(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(
-        name="Table",
-        help="Display the current Premier League Table."
+    @app_commands.command(
+        name="table",
+        description="Display the current Premier League Table."
     )
-    async def leagueTable(self, ctx,
+    async def leagueTable(self, interaction: discord.Interaction,
                           background: str = ''):
         body = livetable()
 
@@ -26,7 +28,7 @@ class Tables(commands.Cog):
         light_mode = background.startswith('l') or background.startswith('w')
 
         if (light_mode):
-            return await ctx.send(f"Light mode is not allowed, you spud.")
+            return await interaction.response.send_message(f"Light mode is not allowed, you spud.")
 
         bg_colour = (47, 49, 54)
         font_colour = (255, 255, 255)
@@ -37,15 +39,15 @@ class Tables(commands.Cog):
         d.text((5, 10), body, font_colour, font=font)
         img.save('tempImg.jpg')
 
-        await ctx.send("EPL Standings", file=discord.File('tempImg.jpg'))
+        await interaction.response.send_message("EPL Standings", file=discord.File('tempImg.jpg'))
 
-    @commands.command(
-        name="Europa",
-        help="Display the Europa League Table."
+    @app_commands.command(
+        name="europa",
+        description="Display the Europa League Table."
     )
-    async def europaTable(self, ctx):
+    async def europaTable(self, interaction: discord.Interaction):
         body = main()
-        await ctx.send('```' + body + '```')
+        await interaction.response.send_message('```' + body + '```')
 
 # Utility Functions for tables
 
@@ -167,7 +169,6 @@ def livetable():
     while i < len(rows):
         tablerow = rows[i]
         risefall = [tablerow[0].split(' ', 1)[0], tablerow[0].rsplit(' ', 1)[1]]
-        print(risefall)
         if int(risefall[0]) < int(risefall[1]):
             risefallind = '^ '
         elif int(risefall[0]) > int(risefall[1]):
