@@ -1,7 +1,15 @@
+import json
 import os
+import sys
 
 import discord
 from discord.ext import commands
+
+if not os.path.isfile("config.json"):
+    sys.exit("'Config file not found! Please add it and try again.")
+else:
+    with open("config.json") as file:
+        config = json.load(file)
 
 intents = discord.Intents.default()
 intents.members = True
@@ -9,7 +17,7 @@ intents.message_content = True
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix="", intents=intents)
+        super().__init__(command_prefix=config['prefix'], intents=intents)
 
     async def startup(self):
         await bot.wait_until_ready()
@@ -28,11 +36,6 @@ class Bot(commands.Bot):
                     print(f"[ERROR] {e}")
 
         self.loop.create_task(self.startup())
-try:
-    f = open('token.txt')
-    token = f.readline()
-    f.close()
-    bot = Bot()
-    bot.run(token)
-except Exception as e:
-    print(e)
+
+bot = Bot()
+bot.run(config["token"])

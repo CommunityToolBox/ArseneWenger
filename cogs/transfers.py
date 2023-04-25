@@ -19,18 +19,17 @@ class TransfersCogs(commands.Cog):
         """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
-    @app_commands.command(
+    @commands.command(
         name="anysignings",
-        description="Get Arsenal signings for the current transfer window/season"
-    )
-    async def signings(self, interaction: discord.Interaction):
+        help="Get Arsenal signings for the current transfer window/season")
+    async def signings(self, ctx):
         players = ""
         if "None" not in getSignings():
             for name in getSignings():
                 players += name + "\n"
         else:
             players = "Fuck All"
-        await interaction.response.send_message(players)
+        await ctx.send(players)
 
 
 def getSignings():

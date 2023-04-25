@@ -41,13 +41,13 @@ class Tables(commands.Cog):
 
         await interaction.response.send_message("EPL Standings", file=discord.File('tempImg.jpg'))
 
-    @app_commands.command(
-        name="europa",
-        description="Display the Europa League Table."
+    @commands.command(
+        name="Europa",
+        help="Display the Europa League Table."
     )
-    async def europaTable(self, interaction: discord.Interaction):
+    async def europaTable(self, ctx):
         body = main()
-        await interaction.response.send_message('```' + body + '```')
+        await ctx.send('```' + body + '```')
 
 # Utility Functions for tables
 

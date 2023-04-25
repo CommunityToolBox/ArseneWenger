@@ -102,33 +102,36 @@ class FixturesCog(commands.Cog):
 
         await interaction.response.send_message(embed=embed)
 
-    @app_commands.command(
+    @commands.command(
         name="euro",
-        description="Show recent results"
+        aliases=("euros", ),
+        help="Show recent results"
     )
-    async def euro(self, interaction: discord.Interaction):
+    async def euro(self, ctx):
         body = getInternationalCup()
-        await interaction.response.send_message(f"```{body}```")
+        await ctx.send(f"```{body}```")
 
-    @app_commands.command(
+    @commands.command(
         name="copa",
-        description="Show results"
+        aliases=("copas", ),
+        help="Show results"
     )
-    async def copa(self, interaction: discord.Interaction):
+    async def copa(self, ctx):
         body = getInternationalCup(44, 20210710)
-        await interaction.response.send_message(f"```{body}```")
+        await ctx.send(f"```{body}```")
 
-    @app_commands.command(
+    @commands.command(
         name="olympic",
-        description="Show results"
+        aliases=("olympics", ),
+        help="Show results"
     )
-    async def olympic(self, interaction: discord.Interaction):
+    async def olympic(self, ctx):
         body = getInternationalCup(66, 20210810)
         body = 'Men:\n' + body
-        await interaction.response.send_message(f"```{body}```")
+        await ctx.send(f"```{body}```")
         body = getInternationalCup(65, 20210810)
         body = 'Women:\n' + body
-        await interaction.response.send_message(f"```{body}```")
+        await ctx.send(f"```{body}```")
 
 i = 0
 
