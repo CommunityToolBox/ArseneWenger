@@ -22,6 +22,7 @@ class Bot(commands.Bot):
     async def startup(self):
         await bot.wait_until_ready()
         await bot.tree.sync()
+        await bot.change_presence(activity=discord.Game(name='Wengerball'))
         print('Successfully synced applications commands')
         print(f'Connected as {bot.user}')
 
