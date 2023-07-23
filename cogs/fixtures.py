@@ -36,9 +36,11 @@ class FixturesCog(commands.Cog):
         )
 
         for fixture in fixture_list:
+            date_string = f"""{fixture.date} {date.today()}  {fixture.time}"""
+            discord_aware_stamp = f"<t:{int(datetime.strptime(date_string, '%b %d %Y %H:%M').timestamp())}:F>"
             embed.add_field(
                 name=f"{fixture.team} - {fixture.comp}",
-                value=f"{fixture.time} - {fixture.date}",
+                value=f"{discord_aware_stamp}",
                 inline=False
             )
 
@@ -63,10 +65,12 @@ class FixturesCog(commands.Cog):
         else:
             delta = date_object - datetime.utcnow()
 
+        discord_aware_stamp = f"<t:{int(date_object.timestamp())}:F>"
+
         if delta.days > 0:
-            response = f"Next match is {fixture.team} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+            response = f"Next match is {fixture.team} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes \n On {discord_aware_stamp}"
         elif delta.days == 0:
-            response = f"Next match is {fixture.team} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+            response = f"Next match is {fixture.team} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes \n {discord_aware_stamp}"
         else:
             channel = discord.utils.get(interaction.guild.text_channels, name="live-games")
             response = f"There is a match playing right now! head over to <#{channel.id}>"
