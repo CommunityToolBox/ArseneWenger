@@ -3,22 +3,22 @@
 """
 A cog to give interesting player facts
 """
-from inspect import Attribute
-import pandas as pd
-from bs4 import BeautifulSoup
-import requests
 import re
-from tabulate import tabulate
-import discord
-from discord.ext import commands
 from datetime import datetime
+
+import discord
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from discord import app_commands
+from discord.ext import commands
+from tabulate import tabulate
 
 
 class PlayerStatsCog(commands.Cog):
     """The ping to your pong"""
 
     def __init__(self, bot):
-        """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
         self.CLUB_ID_TRANSLATIONS = {
@@ -52,12 +52,13 @@ class PlayerStatsCog(commands.Cog):
             'efl': 'EFL Cup'
         }
 
-    @commands.command(
+    @app_commands.command(
         name="goals",
-        help="Get highest goalscorers for a specific team, defaults to Arsenal.")
-    async def goals(self, ctx, *, team: str = 'Arsenal'):
+        description="Get highest goalscorers for a specific team, defaults to Arsenal."
+    )
+    async def goals(self, interaction: discord.Interaction, team: str = 'Arsenal'):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
-            return await ctx.send(f'Sorry, I couldn\'t find a team with the name {team},\n'
+            return await interaction.response.send_message(f'Sorry, I couldn\'t find a team with the name {team},\n'
                                   f'allowed values are [{", ".join(name.title() for name in self.CLUB_ID_TRANSLATIONS.keys())}]')
 
         team_id = self.CLUB_ID_TRANSLATIONS[team.lower()][0]
@@ -74,14 +75,15 @@ class PlayerStatsCog(commands.Cog):
             name=f"Top Goalscorers for {team.title()}",
             icon_url=self.CLUB_ID_TRANSLATIONS[team.lower()][1]
         )
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(
+    @app_commands.command(
         name="assists",
-        help="Get highest goalscorers for a specific team, defaults to Arsenal.")
-    async def assists(self, ctx, competition: str = 'pl'):
+        description="Get highest goalscorers for a specific team, defaults to Arsenal."
+    )
+    async def assists(self, interaction: discord.Interaction, competition: str = 'pl'):
         if competition.lower() not in self.COMPETITION_TRANSLATIONS:
-            return await ctx.send(f'Sorry, I couldn\'t find a competition with the name {competition}, '
+            return await interaction.response.send_message(f'Sorry, I couldn\'t find a competition with the name {competition}, '
                                   f'allowed values are [{", ".join(name.upper() for name in self.COMPETITION_TRANSLATIONS.keys())}]')
 
         competition_name = self.COMPETITION_TRANSLATIONS[competition.lower()]
@@ -95,14 +97,15 @@ class PlayerStatsCog(commands.Cog):
             icon_url=self.CLUB_ID_TRANSLATIONS['arsenal'][1]
         )
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
     
-    @commands.command(
+    @app_commands.command(
         name="injuries",
-        help="Get the list of injuries and details about them")
-    async def injuries(self, ctx, team: str = 'Arsenal'):
+        description="Get the list of injuries and details about them"
+    )
+    async def injuries(self, interaction: discord.Interaction, team: str = 'Arsenal'):
         if team != "Arsenal":
-            return await ctx.send("Sorry, currently only Arsenal injuries can be seen.  Stay tuned for other teams")
+            return await interaction.response.send_message("Sorry, currently only Arsenal injuries can be seen.  Stay tuned for other teams")
         injuries = getInjuries(team)
         embed = discord.Embed(
             color=0x9C824A,
@@ -110,8 +113,7 @@ class PlayerStatsCog(commands.Cog):
         )
         for i in injuries:
             embed.add_field(name=f'**{i["Player"]}**', value=f"> Reason: *{i['Reason']}*\n> Further Detail: *{i['FurtherDetail']}*\n> Potential Return: *{i['PotentialReturn']}*\n> Condition: *{i['Condition']}*\n> Status: *{i['Status']}*", inline=False)
-        
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
 def getPlayerStats(club_id):
     top_scorer = dict()
@@ -215,11 +217,11 @@ def getInjuries(team="Arsenal"):
     return injuries
     
 
-def setup(bot):
+async def setup(bot):
     """
     Add the cog we have made to our bot.
 
     This function is necessary for every cog file, multiple classes in the
     same file all need adding and each file must have their own setup function.
     """
-    bot.add_cog(PlayerStatsCog(bot))
+    await bot.add_cog(PlayerStatsCog(bot))

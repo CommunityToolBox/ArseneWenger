@@ -37,11 +37,11 @@ class ReactionsCog(commands.Cog):
                     await message.add_reaction(reaction)
 
 
-def setup(bot):
+async def setup(bot):
     """
     Add the cog we have made to our bot.
 
     This function is necessary for every cog file, multiple classes in the
     same file all need adding and each file must have their own setup function.
     """
-    bot.add_cog(ReactionsCog(bot))
+    await bot.add_cog(ReactionsCog(bot))
