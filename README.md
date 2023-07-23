@@ -19,29 +19,20 @@ If not already setup, follow https://docs.github.com/en/authentication/connectin
    3. `git fetch origin`
    4. `git branch --set-upstream-to origin/master master`
 3. Happy coding!
+4. Add your `config.json` file:
+
+<pre>
+{
+  "prefix": "!"
+  "token": "discord_token"
+}
+</pre>
 
 ## Commands
 
-This bot works with many different commands. At any point you can issue !help to get them listed.
+This bot works with many different slash commands, type a slash "/" to get started.  
+At any point you can also issue !help to get legacy commands listed.
 
-```
-!help
-Display this message.
-!table
-Display the current Premier League Table.
-!europa
-Display the Europa League table.
-!wengerfact
-Get a random fact about our lord and savior Arsene Wenger.
-!unaifact
-Get a random fact about our former manager Unai Emery.
-!artetafact
-Get a random fact about our manager Mikel Arteta.
-!fixtures
-Display the next 3 fixtures.
-!wengyboi <#>
-Make a wengyboi of # length! Max 10.
-```
 
 ### Suggestions
 

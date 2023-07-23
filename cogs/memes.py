@@ -5,6 +5,8 @@ A cog with meme commands
 """
 import random
 
+import discord
+from discord import app_commands
 from discord.ext import commands
 
 from utils import clamp_int
@@ -15,17 +17,17 @@ class MemeCog(commands.Cog):
         """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
-    @commands.command(
+    @app_commands.command(
         name="wengyboi",
-        help="Make a wengyboi of # length! Max 10.")
-    async def makewneger(self, ctx, length: int = 1):
+        description="Make a wengyboi of # length! Max 10.")
+    async def makewenger(self, interaction: discord.Interaction, length: int = 1):
         length = clamp_int(length, 1, 10)
 
         body = '<:ArseneTop:522209469547937802>\n'
         for i in range(0, length):
             body += '<:ArseneMid:522209585403265045>\n'
         body += '<:ArseneBot:522209598464196608>\n'
-        await ctx.send(body)
+        await interaction.response.send_message(body)
 
     @commands.command(
         name="copy"
@@ -38,11 +40,11 @@ class MemeCog(commands.Cog):
         await ctx.send(random.choice(pastas))
 
 
-def setup(bot):
+async def setup(bot):
     """
     Add the cog we have made to our bot.
 
     This function is necessary for every cog file, multiple classes in the
     same file all need adding and each file must have their own setup function.
     """
-    bot.add_cog(MemeCog(bot))
+    await bot.add_cog(MemeCog(bot))

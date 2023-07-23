@@ -10,7 +10,7 @@ from fotmob import fotmob
 from datetime import datetime,timedelta
 from datetime import date
 from discord.ext import commands
-
+from discord import app_commands
 from utils import clamp_int
 
 
@@ -19,11 +19,11 @@ class FixturesCog(commands.Cog):
         """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
-    @commands.command(
+    @app_commands.command(
         name="fixtures",
-        aliases=("fixture", ),
-        help="Display the next N fixtures, default 3, max 10.")
-    async def fixtures(self, ctx, count: int = 3):
+        description="Display the next N fixtures, default 3, max 10."
+    )
+    async def fixtures(self, interaction: discord.Interaction, count: int = 3):
         count = clamp_int(count, 1, 10)
         fixtures = parseFixtures()
         fixture_list = findFixtures(fixtures, count)
@@ -42,13 +42,13 @@ class FixturesCog(commands.Cog):
                 inline=False
             )
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(
+    @app_commands.command(
         name="next",
-        help="Display the time between now in utc and the next match."
+        description="Display the time between now in utc and the next match."
     )
-    async def next(self, ctx):
+    async def next(self, interaction: discord.Interaction):
         """Returns how many days, hours, and minutes are left until the next fixture"""
         fixtures = parseFixtures()
         fixture = findFixtures(fixtures, 1)[0]
@@ -68,7 +68,7 @@ class FixturesCog(commands.Cog):
         elif delta.days == 0:
             response = f"Next match is {fixture.team} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
         else:
-            channel = discord.utils.get(ctx.guild.text_channels, name="live-games")
+            channel = discord.utils.get(interaction.guild.text_channels, name="live-games")
             response = f"There is a match playing right now! head over to <#{channel.id}>"
 
         embed = discord.Embed(
@@ -81,14 +81,13 @@ class FixturesCog(commands.Cog):
             icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
         )
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(
+    @app_commands.command(
         name="results",
-        aliases=("result", ),
-        help="Show recent results"
+        description="Show recent results"
     )
-    async def results(self, ctx):
+    async def results(self, interaction: discord.Interaction):
         fixtures = parseResults()
         body = findResults(fixtures)
 
@@ -101,7 +100,7 @@ class FixturesCog(commands.Cog):
             icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
         )
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
     @commands.command(
         name="euro",
@@ -341,11 +340,11 @@ def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally writte
     return body
 
 
-def setup(bot):
+async def setup(bot):
     """
     Add the cog we have made to our bot.
 
     This function is necessary for every cog file, multiple classes in the
     same file all need adding and each file must have their own setup function.
     """
-    bot.add_cog(FixturesCog(bot))
+    await bot.add_cog(FixturesCog(bot))

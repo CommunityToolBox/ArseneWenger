@@ -151,6 +151,7 @@ crashlytics-build.properties
 fabric.properties
 
 
+config.json
 token.txt
 
 tempImg.jpg
