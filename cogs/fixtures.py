@@ -25,7 +25,7 @@ class FixturesCog(commands.Cog):
     )
     async def fixtures(self, interaction: discord.Interaction, count: int = 3):
         count = clamp_int(count, 1, 10)
-        fixtures = parseFixtures()
+        fixtures = parse_arsenal("fixtures")
         fixture_list = findFixtures(fixtures, count)
 
         embed = discord.Embed(color=0x9C824A)
@@ -52,7 +52,7 @@ class FixturesCog(commands.Cog):
     )
     async def next(self, interaction: discord.Interaction):
         """Returns how many days, hours, and minutes are left until the next fixture"""
-        fixtures = parseFixtures()
+        fixtures = parse_arsenal("fixtures")
         fixture = findFixtures(fixtures, 1)[0]
         if (date.today()).month == 12 and "jan" in fixture.date.lower():
             next_match_date = f"""{fixture.date} {date.today().year+1}  {fixture.time}"""
@@ -92,7 +92,7 @@ class FixturesCog(commands.Cog):
         description="Show recent results"
     )
     async def results(self, interaction: discord.Interaction):
-        fixtures = parseResults()
+        fixtures = parse_arsenal("results")
         body = findResults(fixtures)
 
         embed = discord.Embed(
@@ -168,23 +168,17 @@ def bst_flag():
     else:
         return False
 
-def parseFixtures():
-    website = "https://www.arsenal.com/fixtures"
-    fixturesWebsite = requests.get(website, timeout=15)
-    fixture_html = fixturesWebsite.text
-    soup = BeautifulSoup(fixture_html, "lxml")
-    table = soup.find("div",{"class","accordions"})
-    matches = table.findAll("article",attrs={'role':'article'})
-    #fixtures[0] now holds the next match
-    return matches
-
-def parseResults():
-    website = "https://www.arsenal.com/results"
-    fixtureWebsite = requests.get(website,timeout=15)
-    fixture_html = fixtureWebsite.text
-    soup = BeautifulSoup(fixture_html, "lxml")
-    table = soup.find("div",{"class","accordions"})
-    matches = table.findAll("article",attrs={'role':'article'})
+def parse_arsenal(value: str):
+    url = f"https://www.arsenal.com/{value}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/58.0.3029.110 Safari/537.3'
+    }
+    response = requests.get(url,timeout=15, headers=headers).text
+    soup = BeautifulSoup(response, "lxml")
+    table = soup.find("div", {"class","accordions"})
+    matches = table.findAll("article",attrs={'role': 'article'})
     return matches
 
 def findFixtures(matches, number):
