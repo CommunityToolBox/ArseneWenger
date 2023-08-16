@@ -14,6 +14,8 @@ from discord import app_commands
 from discord.ext import commands
 from tabulate import tabulate
 
+from utils import current_season
+
 
 class PlayerStatsCog(commands.Cog):
     """The ping to your pong"""
@@ -154,8 +156,8 @@ def getGoalsScored(club):
 
 
 def getAssists(comp):
-    tableurl = "https://fbref.com/en/squads/18bb7c10/2022-2023/all_comps/Arsenal-Stats-All-Competitions"
-    x1 = requests.get(tableurl, stream=True)
+    table_url = f"https://fbref.com/en/squads/18bb7c10/{current_season()}/all_comps/Arsenal-Stats-All-Competitions"
+    x1 = requests.get(table_url, stream=True)
     x2 = ""
     ind = False
     for lines in x1.iter_lines():
