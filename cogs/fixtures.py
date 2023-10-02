@@ -10,7 +10,7 @@ from fotmob import fotmob
 from datetime import datetime,timedelta
 from datetime import date
 from discord.ext import commands
-
+from discord import app_commands
 from utils import clamp_int
 
 
@@ -19,13 +19,13 @@ class FixturesCog(commands.Cog):
         """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
-    @commands.command(
+    @app_commands.command(
         name="fixtures",
-        aliases=("fixture", ),
-        help="Display the next N fixtures, default 3, max 10.")
-    async def fixtures(self, ctx, count: int = 3):
+        description="Display the next N fixtures, default 3, max 10."
+    )
+    async def fixtures(self, interaction: discord.Interaction, count: int = 3):
         count = clamp_int(count, 1, 10)
-        fixtures = parseFixtures()
+        fixtures = parse_arsenal("fixtures")
         fixture_list = findFixtures(fixtures, count)
 
         embed = discord.Embed(color=0x9C824A)
@@ -42,15 +42,15 @@ class FixturesCog(commands.Cog):
                 inline=False
             )
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(
+    @app_commands.command(
         name="next",
-        help="Display the time between now in utc and the next match."
+        description="Display the time between now in utc and the next match."
     )
-    async def next(self, ctx):
+    async def next(self, interaction: discord.Interaction):
         """Returns how many days, hours, and minutes are left until the next fixture"""
-        fixtures = parseFixtures()
+        fixtures = parse_arsenal("fixtures")
         fixture = findFixtures(fixtures, 1)[0]
         if (date.today()).month == 12 and "jan" in fixture.date.lower():
             next_match_date = f"""{fixture.date} {date.today().year+1}  {fixture.time}"""
@@ -68,7 +68,7 @@ class FixturesCog(commands.Cog):
         elif delta.days == 0:
             response = f"Next match is {fixture.team} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
         else:
-            channel = discord.utils.get(ctx.guild.text_channels, name="live-games")
+            channel = discord.utils.get(interaction.guild.text_channels, name="live-games")
             response = f"There is a match playing right now! head over to <#{channel.id}>"
 
         embed = discord.Embed(
@@ -81,15 +81,14 @@ class FixturesCog(commands.Cog):
             icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
         )
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
-    @commands.command(
+    @app_commands.command(
         name="results",
-        aliases=("result", ),
-        help="Show recent results"
+        description="Show recent results"
     )
-    async def results(self, ctx):
-        fixtures = parseResults()
+    async def results(self, interaction: discord.Interaction):
+        fixtures = parse_arsenal("results")
         body = findResults(fixtures)
 
         embed = discord.Embed(
@@ -101,7 +100,7 @@ class FixturesCog(commands.Cog):
             icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
         )
 
-        await ctx.send(embed=embed)
+        await interaction.response.send_message(embed=embed)
 
     @commands.command(
         name="euro",
@@ -165,23 +164,17 @@ def bst_flag():
     else:
         return False
 
-def parseFixtures():
-    website = "https://www.arsenal.com/fixtures"
-    fixturesWebsite = requests.get(website, timeout=15)
-    fixture_html = fixturesWebsite.text
-    soup = BeautifulSoup(fixture_html, "lxml")
-    table = soup.find("div",{"class","accordions"})
-    matches = table.findAll("article",attrs={'role':'article'})
-    #fixtures[0] now holds the next match
-    return matches
-
-def parseResults():
-    website = "https://www.arsenal.com/results"
-    fixtureWebsite = requests.get(website,timeout=15)
-    fixture_html = fixtureWebsite.text
-    soup = BeautifulSoup(fixture_html, "lxml")
-    table = soup.find("div",{"class","accordions"})
-    matches = table.findAll("article",attrs={'role':'article'})
+def parse_arsenal(value: str):
+    url = f"https://www.arsenal.com/{value}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/58.0.3029.110 Safari/537.3'
+    }
+    response = requests.get(url,timeout=15, headers=headers).text
+    soup = BeautifulSoup(response, "lxml")
+    table = soup.find("div", {"class","accordions"})
+    matches = table.findAll("article",attrs={'role': 'article'})
     return matches
 
 def findFixtures(matches, number):
@@ -341,11 +334,11 @@ def getInternationalCup(leagueCode = 50, endDate = 20210711): #originally writte
     return body
 
 
-def setup(bot):
+async def setup(bot):
     """
     Add the cog we have made to our bot.
 
     This function is necessary for every cog file, multiple classes in the
     same file all need adding and each file must have their own setup function.
     """
-    bot.add_cog(FixturesCog(bot))
+    await bot.add_cog(FixturesCog(bot))

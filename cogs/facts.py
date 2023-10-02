@@ -5,6 +5,7 @@ A cog to spit back random lines from files
 """
 import discord
 from discord.ext import commands
+from discord import app_commands
 import random
 
 from utils import getTimestamp
@@ -31,25 +32,28 @@ class FactsCog(commands.Cog):
             content = f.read()
 
         for message in content.split("\n\n"):
-            await ctx.send(message)
+            return await ctx.send(message)
 
-    @commands.command(
+    @app_commands.command(
         name="wengerfact",
-        help="Get a random fact about our lord and savior Arsene Wenger.")
-    async def wengerFact(self, ctx):
-        await ctx.send(embed=await self.getManagerFact('wenger'))
+        description="Get a random fact about our lord and savior Arsene Wenger."
+    )
+    async def wengerFact(self, interaction: discord.Interaction):
+        await interaction.response.send_message(embed=await self.getManagerFact('wenger'))
 
-    @commands.command(
+    @app_commands.command(
         name="unaifact",
-        help="Get a random fact about our former manager Unai Emery.")
-    async def unaiFact(self, ctx):
-        await ctx.send(embed=await self.getManagerFact('unai'))
+        description="Get a random fact about our former manager Unai Emery."
+    )
+    async def unaiFact(self, interaction: discord.Interaction):
+        await interaction.response.send_message(embed=await self.getManagerFact('unai'))
 
-    @commands.command(
+    @app_commands.command(
         name="artetafact",
-        help="Get a random fact about our current manager Mikel Arteta")
-    async def artetaFact(self, ctx):
-        await ctx.send(embed=await self.getManagerFact('arteta'))
+        description="Get a random fact about our current manager Mikel Arteta"
+    )
+    async def artetaFact(self, interaction: discord.Interaction):
+        await interaction.response.send_message(embed=await self.getManagerFact('arteta'))
 
     async def getManagerFact(self, manager):
         """
@@ -75,11 +79,11 @@ class FactsCog(commands.Cog):
             print(f"{getTimestamp()}\nError reading file {facts}")
 
 
-def setup(bot):
+async def setup(bot):
     """
     Add the cog we have made to our bot.
 
     This function is necessary for every cog file, multiple classes in the
     same file all need adding and each file must have their own setup function.
     """
-    bot.add_cog(FactsCog(bot))
+    await bot.add_cog(FactsCog(bot))
