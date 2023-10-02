@@ -28,3 +28,15 @@ def clamp_int(value, minimum, maximum):
     elif value > maximum:
         value = maximum
     return value
+
+def current_season() -> str:
+    """
+    Returns a season string i.e. 2022-2023, 2023-2024
+
+    We check whether we are in a season typically between August and May
+    """
+    now = datetime.datetime.now()
+    if now.month >= 8 or now.month <= 5:
+        return f"{now.year}-{now.year + 1}"
+    else:
+        return f"{now.year - 1}-{now.year}"
