@@ -1,4 +1,3 @@
-discord==1.7.3
 discord.py==2.2.2
 bs4==0.0.1
 datetime==4.3
@@ -6,7 +5,6 @@ tabulate==0.8.9
 Pillow==9.0.0
 pandas==1.4.0
 lxml==4.9.2
-fotmob==0.0.2
-
+python-fotmob-wrapper==0.1.8
 requests==2.31.0
 beautifulsoup4==4.10.0
