@@ -116,6 +116,17 @@ class PlayerStatsCog(commands.Cog):
         team_table = parsed_page.find_all('tr', attrs={'class': "player-row team_1"})
         injured_players = [i.text for i in team_table]
 
+        """
+        injured_players is a list of strings, example of each string:
+        
+        PlayerThomas Partey
+        ReasonThigh Injury
+        Further DetailNov 10: 'He's progressing really well; it was a significant injury'
+        Potential Return28/12/2023
+        ConditionCurrently Being Assessed
+        StatusRuled Out
+        """
+
         embed = discord.Embed(color=0x9C824A)
         embed.set_footer(text=f"Data is sourced from {injuries_url}")
 
