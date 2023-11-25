@@ -105,16 +105,44 @@ class PlayerStatsCog(commands.Cog):
         name="injuries",
         description="Get the list of injuries and details about them"
     )
-    async def injuries(self, interaction: discord.Interaction, team: str = 'Arsenal'):
-        if team != "Arsenal":
-            return await interaction.response.send_message("Sorry, currently only Arsenal injuries can be seen.  Stay tuned for other teams")
-        injuries = getInjuries(team)
-        embed = discord.Embed(
-            color=0x9C824A,
-            title=f"Injuries for {team.title()}"
-        )
-        for i in injuries:
-            embed.add_field(name=f'**{i["Player"]}**', value=f"> Reason: *{i['Reason']}*\n> Further Detail: *{i['FurtherDetail']}*\n> Potential Return: *{i['PotentialReturn']}*\n> Condition: *{i['Condition']}*\n> Status: *{i['Status']}*", inline=False)
+    async def injuries(self, interaction: discord.Interaction):
+        injuries_url = "https://www.premierinjuries.com/injury-table.php"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
+            "X-Requested-With": "XMLHttpRequest"
+        }
+        response = requests.get(injuries_url, headers=headers).text
+        parsed_page = BeautifulSoup(response, features="lxml")
+        team_table = parsed_page.find_all('tr', attrs={'class': "player-row team_1"})
+        injured_players = [i.text for i in team_table]
+
+        """
+        injured_players is a list of strings, example of each string:
+        
+        PlayerThomas Partey
+        ReasonThigh Injury
+        Further DetailNov 10: 'He's progressing really well; it was a significant injury'
+        Potential Return28/12/2023
+        ConditionCurrently Being Assessed
+        StatusRuled Out
+        """
+
+        embed = discord.Embed(color=0x9C824A)
+        embed.set_footer(text=f"Data is sourced from {injuries_url}")
+
+        for player in injured_players:
+            details = player.split("\n")
+            embed.add_field(
+                name=details[1].split("Player")[1],
+                value=f"""
+                > **Reason**: {details[2].split('Reason')[1]} 
+                > **Details**: {details[3].split('Further Detail')[1]}
+                > **Potential Return**: {details[4].split('Potential Return')[1]}
+                > **Condition**: {details[5].split('Condition')[1]}
+                > **Status**: {details[6].split('Status')[1]}
+                """,
+                inline=False
+            )
         await interaction.response.send_message(embed=embed)
 
 def getPlayerStats(club_id):
@@ -178,46 +206,6 @@ def getAssists(comp):
     table = tabulate(sub_table, tablefmt='plain', colalign=('left', 'right',))
     return table
 
-def getInjuries(team="Arsenal"):
-    tableurl = "https://www.premierinjuries.com/injury-table.php"
-    #get table and convert to dataframe
-    header = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
-        "X-Requested-With": "XMLHttpRequest"
-    }
-    injuries = []
-    r = requests.get(tableurl).text
-    bs_obj = BeautifulSoup(r, features="lxml")
-    #currently team_1 is arsenal, but ideally i'd like to have some sort of error-checky way
-    # to make sure that it looks for arsenal and confirms that the team ID is 1.  
-    #i'll let future ren figure that out
-    fullTable = bs_obj.find_all('tr', attrs={'class': "player-row team_1"})
-    playerList = [i.text for i in fullTable]
-    for plObj in playerList:
-        playerDict = {"Player": "", "Reason": "", "FurtherDetail": "", "PotentialReturn": "", "Condition": "", "Status": ""}
-        plObj = plObj.split('\n')
-        plObj.pop(0)
-        player = plObj.pop(0)
-        playerDict["Player"] = player.rsplit("Player")[-1]
-        reason = plObj.pop(0)
-        playerDict["Reason"] = reason.rsplit("Reason")[-1]
-        furtherDetail = plObj.pop(0)
-        playerDict["FurtherDetail"] = furtherDetail.rsplit("Further Detail")[-1]
-        potentialReturn = plObj.pop(0)
-        # dates are in dd/mm/yyyy, AKA the correct way :D
-        returnDate = potentialReturn.rsplit("Potential Return")[-1]
-        if returnDate != "No Return Date":
-            returnDate = datetime.strptime(returnDate, '%d/%m/%Y')
-            playerDict["PotentialReturn"] = returnDate.strftime("%d-%B-%Y")
-        else:
-            playerDict["PotentialReturn"] = returnDate
-        condition = plObj.pop(0)
-        playerDict["Condition"] = condition.rsplit("Condition")[-1]
-        status = plObj.pop(0)
-        playerDict["Status"] = status.rsplit("Status")[-1]
-        injuries += [playerDict]
-    return injuries
-    
 
 async def setup(bot):
     """
