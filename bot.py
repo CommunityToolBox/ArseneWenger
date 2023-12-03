@@ -13,6 +13,7 @@ else:
 
 intents = discord.Intents.default()
 intents.members = True
+intents.messages = True
 intents.message_content = True
 
 class Bot(commands.Bot):
@@ -40,3 +41,4 @@ class Bot(commands.Bot):
 
 bot = Bot()
 bot.run(config["token"])
+
