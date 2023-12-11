@@ -11,7 +11,8 @@ from datetime import datetime,timedelta
 from datetime import date
 from discord.ext import commands
 from discord import app_commands
-from utils import clamp_int
+if __name__ != "__main__":
+    from utils import clamp_int
 
 
 class FixturesCog(commands.Cog):
@@ -253,7 +254,6 @@ def parse_arsenal(gender="men"):
     # Example Table Class:
     response = requests.get(url,timeout=15, headers=headers).text
     soup = BeautifulSoup(response, "lxml")
-    # table = soup.find("div", {"class","results*"})
     table = soup.select_one('div[class*="results-fixure--slimline"]')
     #find all table class="cols-0"
     matches = table.findAll("table",attrs={'class': 'cols-0'})
@@ -270,6 +270,9 @@ def findResults(matches, number: int = 3):
         currentDate = datetime.utcnow()
         if matchMonth.year > currentDate.year or currentDate.month < matchMonth.month:
             continue
+        #elseif match falls in the same month, but still in the future, skip it
+        elif matchMonth.year == currentDate.year and currentDate.month == matchMonth.month and currentDate.day < matchMonth.day:
+            continue
         #the rest can be split by \n\n\n
         resultsArray = match.text.split('\n\n\n')
         resultsArray.pop(0)
@@ -281,7 +284,7 @@ def findResults(matches, number: int = 3):
             resultDate = arr.split('\n\n')[0].strip()
             resultDate = datetime.strptime(resultDate, '%a %b %d - %H:%M')
             twoHoursFromNow = currentDate + timedelta(hours=2)
-            if resultDate.day >= currentDate.day and resultDate.month >= currentDate.month and resultDate.hour >= twoHoursFromNow.hour:
+            if resultDate.day >= currentDate.day:
                 continue
             matchObj = parseResultArray(arr)
             results += [matchObj]
@@ -346,7 +349,7 @@ def parseResultArray(resultArray):
     resultObj.time = resultStr[0].split(' - ')[1].strip()
     homeTeam = resultStr[1].split('\n')[0].strip()
     score = resultStr[1].split('\n')[2].strip()
-    awayTeam = resultStr[2].split('\n')[0].strip()
+    awayTeam = resultStr[-1].split('\n')[0].strip()
     resultObj.comp = resultStr[2].split('\n')[2].strip()
     resultObj.team = getOpponent(homeTeam, awayTeam)
     resultObj.score = score
