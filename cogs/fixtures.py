@@ -40,12 +40,15 @@ class FixturesCog(commands.Cog):
                 inline=False
             )
         
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
+
     @app_commands.command(
         name="fixtures",
         description="Display the next N fixtures, default 3, max 10."
     )
     async def fixtures(self, interaction: discord.Interaction, count: int = 3):
+        #defer
+        await interaction.response.defer()
         await self.generate_fixtures_embed(interaction, "", count)
 
     @app_commands.command(
@@ -53,6 +56,7 @@ class FixturesCog(commands.Cog):
         description="Display the next N fixtures for women's team, default 3, max 10."
     )
     async def wfixtures(self, interaction: discord.Interaction, count: int = 3):
+        await interaction.response.defer()
         await self.generate_fixtures_embed(interaction, "women", count)
     
     async def generate_next_embed(self, interaction: discord.Interaction, team_type: str):
@@ -90,7 +94,7 @@ class FixturesCog(commands.Cog):
             icon_url="https://resources.premierleague.com/premierleague/badges/t3.png"
         )
 
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     @app_commands.command(
         name="next",
@@ -98,6 +102,9 @@ class FixturesCog(commands.Cog):
     )
     async def next(self, interaction: discord.Interaction):
         """Returns how many days, hours, and minutes are left until the next fixture"""
+        #defer the response so that we don't get an unknown interaction error if it takes longer than 3 seconds
+        await interaction.response.defer()
+        # now we can generate the embed
         await self.generate_next_embed(interaction, "")
     
     @app_commands.command(
@@ -105,6 +112,10 @@ class FixturesCog(commands.Cog):
         description="Display the time between now in utc and the next women's match."
     )
     async def wnext(self, interaction: discord.Interaction):
+        """Returns how many days, hours, and minutes are left until the next women's fixture"""
+        #defer the response so that we don't get an unknown interaction error if it takes longer than 3 seconds
+        await interaction.response.defer()
+        # now we can generate the embed
         await self.generate_next_embed(interaction, "women")
         
     async def generate_results_embed(self, interaction: discord.Interaction, team_type: str, count: int = 3):
@@ -134,13 +145,14 @@ class FixturesCog(commands.Cog):
                 inline=False
             )
 
-        await interaction.response.send_message(embed=embed)
+        await interaction.followup.send(embed=embed)
 
     @app_commands.command(
         name="results",
         description="Show Recent Men's Results"
     )
     async def results(self, interaction: discord.Interaction, count: int = 3):
+        await interaction.response.defer()
         await self.generate_results_embed(interaction, "", count)
     
     @app_commands.command(
@@ -148,6 +160,7 @@ class FixturesCog(commands.Cog):
         description="Show Recent Women's Results"
     )
     async def wresults(self, interaction: discord.Interaction, count: int = 3):
+        await interaction.response.defer()
         await self.generate_results_embed(interaction, "women", count)
 
     @commands.command(
