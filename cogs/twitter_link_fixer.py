@@ -20,9 +20,10 @@ class TwitterLinkFixerCog(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        twitter_urls = self.find_twitter_urls(message.content.lower())
-        if twitter_urls:
-            for url in twitter_urls:
-                await message.channel.send(f"Fixed that for you! {self.rewrite_url(url)}")
+        # Limit fixing Tweets to first found link, to prevent potential spam
+        twitter_url = self.find_twitter_urls(message.content.lower())[0]
+        if twitter_url:
+            await message.edit(suppress=True)
+            await message.reply(f"Fx'ed that for you! {self.rewrite_url(twitter_url)}", mention_author=False)
 async def setup(bot):
     await bot.add_cog(TwitterLinkFixerCog(bot))
