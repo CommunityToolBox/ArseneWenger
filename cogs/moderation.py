@@ -10,7 +10,7 @@ from discord.ext import commands
 
 logger = logging.getLogger(__name__)
 
-mod_roles = ["The Boss"]
+mod_roles = ['Gaffer', 'Coach', 'Captain']
 
 
 def is_moderator(user):
