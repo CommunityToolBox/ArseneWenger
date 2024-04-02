@@ -3,8 +3,19 @@
 """
 A moderation cog to automate deletion and moderation of messages
 """
+import logging
+import re
+
 from discord.ext import commands
-from discord import app_commands
+
+logger = logging.getLogger(__name__)
+
+mod_roles = ["The Boss"]
+
+
+def is_moderator(user):
+    return any(role.name in mod_roles for role in user.roles)
+
 
 class ModerationCog(commands.Cog):
     """The ping to your pong"""
@@ -16,12 +27,24 @@ class ModerationCog(commands.Cog):
         with open('banned.txt', 'r', encoding="utf-8") as f:
             self.banned = f.read().splitlines()
 
+    def remove_invites(self, message):
+        isInvite = re.search(r'\b(?:https?:\/\/)?(?:www\.)?discord\.gg\/\w+\b', message)
+        if isInvite:
+            logger.info(f'Link {isInvite.group()} in message {message}')
+            message.delete()
+
     @commands.Cog.listener()
     async def on_message(self, message):
+        if message.author.bot:
+            return
+        if is_moderator(message.author):
+            logger.info(f'Mods can do what they want.')
+            return
         msgLower = message.content.lower()
         if any(ele in msgLower for ele in self.banned):
             await message.delete()
             await message.channel.send(f"Sorry {str(message.author)} that source is not allowed.")
+        self.remove_invites(msgLower)
 
     @commands.command(
         name="clear",

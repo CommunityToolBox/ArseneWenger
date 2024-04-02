@@ -1,7 +1,10 @@
+import logging
 import re
 from urllib.parse import urlparse
 
 from discord.ext import commands
+
+logger = logging.getLogger(__name__)
 
 
 class TwitterLinkFixerCog(commands.Cog):
@@ -21,9 +24,15 @@ class TwitterLinkFixerCog(commands.Cog):
         if message.author.bot:
             return
         # Limit fixing Tweets to first found link, to prevent potential spam
-        twitter_url = self.find_twitter_urls(message.content.lower())[0]
+        try:
+            twitter_url = self.find_twitter_urls(message.content.lower())[0]
+        except IndexError:
+            logger.info(f'{message.content} is not a twitter link')
+            twitter_url = ''
         if twitter_url:
             await message.edit(suppress=True)
             await message.reply(f"Fx'ed that for you! {self.rewrite_url(twitter_url)}", mention_author=False)
+
+
 async def setup(bot):
     await bot.add_cog(TwitterLinkFixerCog(bot))
