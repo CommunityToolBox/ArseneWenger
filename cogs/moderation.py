@@ -33,6 +33,7 @@ class ModerationCog(commands.Cog):
         if is_invite:
             logger.info(f'Link {is_invite.group()} in message {message_string}')
             return True
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
@@ -46,7 +47,7 @@ class ModerationCog(commands.Cog):
             await message.channel.send(f"Sorry {str(message.author)} that source is not allowed.")
         elif self.check_invite(msg_lower):
             await message.delete()
-            await message.channel.send(f"Sorry {str(message.author)} invites are not allowed.")
+            await message.channel.send(f"Sorry {str(message.author.display_name)} invites are not allowed.")
 
     @commands.command(
         name="clear",
