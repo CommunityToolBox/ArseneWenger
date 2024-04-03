@@ -27,12 +27,12 @@ class ModerationCog(commands.Cog):
         with open('banned.txt', 'r', encoding="utf-8") as f:
             self.banned = f.read().splitlines()
 
-    def remove_invites(self, message):
-        isInvite = re.search(r'\b(?:https?:\/\/)?(?:www\.)?discord\.gg\/\w+\b', message)
-        if isInvite:
-            logger.info(f'Link {isInvite.group()} in message {message}')
-            message.delete()
-
+    def check_invite(self, message_string):
+        """Check if a message contains a discord invite link and return true for removal."""
+        is_invite = re.search(r'\b(?:https?:\/\/)?(?:www\.)?discord\.gg\/\w+\b', message_string)
+        if is_invite:
+            logger.info(f'Link {is_invite.group()} in message {message_string}')
+            return True
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
@@ -40,11 +40,13 @@ class ModerationCog(commands.Cog):
         if is_moderator(message.author):
             logger.info(f'Mods can do what they want.')
             return
-        msgLower = message.content.lower()
-        if any(ele in msgLower for ele in self.banned):
+        msg_lower = message.content.lower()
+        if any(ele in msg_lower for ele in self.banned):
             await message.delete()
             await message.channel.send(f"Sorry {str(message.author)} that source is not allowed.")
-        self.remove_invites(msgLower)
+        elif self.check_invite(msg_lower):
+            await message.delete()
+            await message.channel.send(f"Sorry {str(message.author)} invites are not allowed.")
 
     @commands.command(
         name="clear",
