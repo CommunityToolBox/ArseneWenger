@@ -30,7 +30,7 @@ class LinkFixerCog(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
-        # Limit fixing Tweets to first found link, to prevent potential spam
+        # finds all links, we can limit this if we struggle with people spamming.
         for domain in self.embed_domains.keys():
             try:
                 urls = self.find_urls(message.content.lower(), domain)
