@@ -30,6 +30,9 @@ class LinkFixerCog(commands.Cog):
     async def on_message(self, message):
         if message.author.bot:
             return
+        # Only embed links for people with more than just the default @Everyone role.
+        if len(message.author.roles) == 1:
+            return
         # finds all links, we can limit this if we struggle with people spamming.
         for domain in self.embed_domains.keys():
             try:
