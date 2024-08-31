@@ -17,7 +17,7 @@ jobs:
           pip install poetry
       - name: Install dependencies
         run: |
-          poetry install --no-root
+          poetry install --no-root --with=dev
       - name: Run pre-commit checks
         run: |
           pre-commit run --all-files
