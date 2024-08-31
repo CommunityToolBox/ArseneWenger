@@ -18,6 +18,9 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install --no-root --with=dev
+      - name: Enter Shell
+        run: |
+          poetry shell
       - name: Run pre-commit checks
         run: |
           pre-commit run --all-files
