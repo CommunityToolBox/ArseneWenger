@@ -30,7 +30,7 @@ If not already setup, follow https://docs.github.com/en/authentication/connectin
 
 ## Commands
 
-This bot works with many different slash commands, type a slash "/" to get started.  
+This bot works with many different slash commands, type a slash "/" to get started.
 At any point you can also issue !help to get legacy commands listed.
 
 

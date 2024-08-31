@@ -15,15 +15,16 @@ class LinkFixerCog(commands.Cog):
             "x.com": "www.fxtwitter.com",
             "tiktok.com": "www.vxtiktok.com",
             "instagram.com": "www.ddinstagram.com",
-            "reddit.com": "www.rxddit.com"
+            "reddit.com": "www.rxddit.com",
         }
+
     def rewrite_media_url(self, message, domain):
         parse_url = urlparse(message)
-        #return the value of the domain key in the embed_domains dictionary
+        # return the value of the domain key in the embed_domains dictionary
         return parse_url._replace(netloc=self.embed_domains[domain]).geturl()
 
     def find_urls(self, message, domain):
-        pattern = re.compile(rf'https?://(?:www\.)?(?:{domain})/\S+')
+        pattern = re.compile(rf"https?://(?:www\.)?(?:{domain})/\S+")
         return re.findall(pattern, message)
 
     @commands.Cog.listener()
@@ -31,11 +32,11 @@ class LinkFixerCog(commands.Cog):
         if message.author.bot:
             return
         # finds all links, we can limit this if we struggle with people spamming.
-        for domain in self.embed_domains.keys():
+        for domain in self.embed_domains:
             try:
                 urls = self.find_urls(message.content.lower(), domain)
             except IndexError:
-                logger.info(f'{message.content} does not contain any {domain} links')
+                logger.info(f"{message.content} does not contain any {domain} links")
             if urls:
                 original_urls = self.find_urls(message.content, domain)
                 url = original_urls[0]
