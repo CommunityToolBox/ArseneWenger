@@ -1,17 +1,24 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import datetime
 
 
-def getTimestamp():
+def get_timestamp():
     """
     Utility function to get a nicely formatted timestamp
     :return: Returns date and time in the following format "DD/MM [HH:MM]"
     """
-    dt = str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + ' '
-    hr = str(datetime.datetime.now().hour) if len(str(datetime.datetime.now().hour)) > 1 else '0' + str(datetime.datetime.now().hour)
-    min = str(datetime.datetime.now().minute) if len(str(datetime.datetime.now().minute)) > 1 else '0' + str(datetime.datetime.now().minute)
-    t = '[' + hr + ':' + min + '] '
+    dt = str(datetime.datetime.now().month) + "/" + str(datetime.datetime.now().day) + " "
+    hr = (
+        str(datetime.datetime.now().hour)
+        if len(str(datetime.datetime.now().hour)) > 1
+        else "0" + str(datetime.datetime.now().hour)
+    )
+    min = (
+        str(datetime.datetime.now().minute)
+        if len(str(datetime.datetime.now().minute)) > 1
+        else "0" + str(datetime.datetime.now().minute)
+    )
+    t = "[" + hr + ":" + min + "] "
     return dt + t
 
 
@@ -28,6 +35,7 @@ def clamp_int(value, minimum, maximum):
     elif value > maximum:
         value = maximum
     return value
+
 
 def current_season() -> str:
     """

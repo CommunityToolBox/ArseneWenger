@@ -1,0 +1,24 @@
+name: Pre-commit Checks
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
+      - name: Install dependencies
+        run: |
+          poetry install --no-root --with=dev
+      - name: Run pre-commit checks
+        run: |
+          poetry run pre-commit run
