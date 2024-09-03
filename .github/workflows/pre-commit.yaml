@@ -2,25 +2,27 @@ name: Pre-commit Checks
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+
       - name: Install Poetry
-        run: |
-          pip install poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
       - name: Install dependencies
         run: |
           poetry install --no-root --with=dev
-      - name: Enter Shell
-        run: |
-          poetry shell
       - name: Run pre-commit checks
         run: |
           pre-commit run --all-files
