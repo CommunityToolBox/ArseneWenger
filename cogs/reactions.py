@@ -15,6 +15,9 @@ class ReactionsCog(commands.Cog):
 
         self.reactions = {
             'tottenham': '\U0001F4A9',
+            'citeh': ['⏸️','5️⃣','\U0001F1EB', '\U0001F1E8' ],
+            'man city': ['⏸️','5️⃣','\U0001F1EB', '\U0001F1E8' ],
+            'manchester city': ['⏸️','5️⃣','\U0001F1EB', '\U0001F1E8' ],
             'spurs': '\U0001F4A9',
             'spuds': '\U0001F4A9',
             'mustafi': ['🔙', '🔛', '🔝'],
