@@ -3,13 +3,17 @@ SHELL ["/bin/bash", "-c"]
 ENTRYPOINT ["/bin/bash"]
 
 COPY . ./
-RUN apt-get update \
-   && cat deb_requirements.txt | xargs -n 1 apt-get install -y --no-install-recommends
+RUN apt update && \
+    apt install -y software-properties-common && \
+    add-apt-repository -y ppa:deadsnakes/ppa && \
+    apt install -y python3.10 && \
+    apt install -y python3.10-venv && \
+    cat deb_requirements.txt | xargs -n 1 apt install -y --no-install-recommends
 
 ENV POETRY_HOME='/usr/local' \
     POETRY_VERSION=1.7.1
-RUN curl -sSL https://install.python-poetry.org | python3 -
-# RUN poetry --version
+RUN curl -sSL https://install.python-poetry.org | python3.10 -
+RUN poetry --version
 RUN ./venvsetup.sh
 ENV PYTHONPATH=/
 ENV BASH_ENV=/etc/shell_profile

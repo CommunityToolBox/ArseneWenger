@@ -1,1 +1,1 @@
-pipx curl python3.10 python3-venv
+pipx curl
