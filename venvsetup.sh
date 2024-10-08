@@ -7,7 +7,7 @@ if [ x"${VENV_LOCATION}" = xnull ] || [ x"${VENV_LOCATION}" = x"" ]; then
   VENV_LOCATION=$THIS_DIR/.venv
 fi
 
-PYTHON_EXECUTABLE="python"
+PYTHON_EXECUTABLE="python3"
 
 
 install_python(){

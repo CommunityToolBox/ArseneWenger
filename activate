@@ -1,0 +1,59 @@
+#!/bin/bash -e
+
+ORIG_DIR=$PWD
+THIS_DIR=$(dirname "${BASH_SOURCE[0]}")
+cd $THIS_DIR
+
+# activate Python
+if [ ! -f ./.venv/bin/activate ]; then
+    echo "Missing venv, skipping activation"
+    return 0
+fi
+. ./.venv/bin/activate
+
+save_function() {
+    local ORIG_FUNC=$(declare -f $1)
+    local NEWNAME_FUNC="$2${ORIG_FUNC#$1}"
+    eval "$NEWNAME_FUNC"
+}
+
+# rename the original deactivate
+save_function deactivate old_deactivate
+
+deactivate() {
+    if ! [ -z "${_OLD_POETRY_VIRTUALENVS_CREATE}" ] ; then
+        export POETRY_VIRTUALENVS_CREATE=$_OLD_POETRY_VIRTUALENVS_CREATE
+    else
+        unset POETRY_VIRTUALENVS_CREATE
+    fi
+    if ! [ -z "${_OLD_PYTHONPATH}" ] ; then
+        export PYTHONPATH=$_OLD_PYTHONPATH
+    else
+        unset PYTHONPATH
+    fi
+    unset _OLD_POETRY_VIRTUALENVS_CREATE
+    unset _OLD_PYTHONPATH
+    unset -f save_function
+    old_deactivate
+    unset -f old_deactivate
+}
+
+# change the prompt
+export PS1=${PS1/(.venv)/(py-sonos-video-testcases)}
+
+# save the original setting if env var is already set and configure poetry
+# to not create its own virtual env if the env var
+if ! [ -z "${POETRY_VIRTUALENVS_CREATE}" ] ; then
+    export _OLD_POETRY_VIRTUALENVS_CREATE=$POETRY_VIRTUALENVS_CREATE
+fi
+export POETRY_VIRTUALENVS_CREATE=false
+
+if ! [ -z "${PYTHONPATH}" ] ; then
+    export _OLD_PYTHONPATH=$PYTHONPATH
+fi
+
+ROOTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export PYTHONPATH=$ROOTDIR
+
+# jump back to the original dir
+cd $ORIG_DIR
