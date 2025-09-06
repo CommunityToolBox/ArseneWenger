@@ -32,6 +32,9 @@ class LinkFixerCog(commands.Cog):
             return
         # finds all links, we can limit this if we struggle with people spamming.
         for domain in self.embed_domains.keys():
+            if message.guild.name != 'gunners':
+                if domain == 'instagram.com':
+                    break
             try:
                 urls = self.find_urls(message.content.lower(), domain)
             except IndexError:
