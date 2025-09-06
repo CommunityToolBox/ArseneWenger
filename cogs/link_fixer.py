@@ -14,7 +14,7 @@ class LinkFixerCog(commands.Cog):
             "twitter.com": "www.fxtwitter.com",
             "x.com": "www.fxtwitter.com",
             "tiktok.com": "www.vxtiktok.com",
-            "instagram.com": "www.ddinstagram.com",
+            "instagram.com": "www.kkinstagram.com",
             "reddit.com": "www.rxddit.com"
         }
     def rewrite_media_url(self, message, domain):
