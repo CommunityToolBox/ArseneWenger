@@ -40,3 +40,11 @@ def current_season() -> str:
         return f"{now.year}-{now.year + 1}"
     else:
         return f"{now.year - 1}-{now.year}"
+
+def make_discord_timestamp(value: datetime.datetime) -> str:
+    """
+    Build a Discord timestamp string from a datetime object
+    This is a unix timestamp that displays a dattime to a Discord
+    user in their localized timezone.
+    """
+    return f"<t:{int(value.timestamp())}:F>"  # F = Full Date Time

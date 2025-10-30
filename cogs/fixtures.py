@@ -9,10 +9,12 @@ from bs4 import BeautifulSoup
 from fotmob import fotmob
 from datetime import datetime,timedelta
 from datetime import date
+from datetime import timezone
 from discord.ext import commands
 from discord import app_commands
+import pytz
 if __name__ != "__main__":
-    from utils import clamp_int
+    from utils import clamp_int, make_discord_timestamp
 
 
 class FixturesCog(commands.Cog):
@@ -22,7 +24,7 @@ class FixturesCog(commands.Cog):
 
 
     async def generate_fixtures_embed(self, interaction: discord.Interaction, team_type: str, count: int = 3):
-        count = clamp_int(count, 1, 10)
+        count = clamp_int(count, 1, 20)
         fixtures = parse_arsenal(team_type)
         fixture_list = findFixtures(fixtures, count)
 
@@ -35,9 +37,13 @@ class FixturesCog(commands.Cog):
         )
 
         for fixture in fixture_list:
+            year = (date.today()).year if not ((date.today()).month >= 8 and "jan" in fixture.date.lower()) else (date.today()).year + 1
+            date_object = datetime.strptime(f"{fixture.date} {year} {fixture.time}", '%a %b %d %Y %H:%M') #local london time
+            date_object = pytz.timezone('Europe/London').localize(date_object)
+            discord_aware_stamp = make_discord_timestamp(date_object.astimezone(pytz.utc))
             embed.add_field(
                 name=f"{fixture.team} - {fixture.comp}",
-                value=f"{fixture.date} {fixture.time}",
+                value=f"{discord_aware_stamp}",
                 inline=False
             )
         
@@ -70,16 +76,17 @@ class FixturesCog(commands.Cog):
             next_match_date = f"""{fixture.date} {(date.today()).year}  {fixture.time}"""
 
         #next_match_date example: Wed Nov 29 2023 20:00
-        date_object = datetime.strptime(next_match_date, '%a %b %d %Y %H:%M')
-        if bst_flag():
-            delta = date_object - (datetime.utcnow() + timedelta(hours=1))
-        else:
-            delta = date_object - datetime.utcnow()
-
+        date_object = datetime.strptime(next_match_date, '%a %b %d %Y %H:%M') #local london time
+        #convert date_object to utc
+        london = pytz.timezone('Europe/London')
+        date_object = london.localize(date_object)
+        date_object = date_object.astimezone(pytz.utc)
+        delta = date_object - datetime.now(timezone.utc)
+        discord_timestamp = make_discord_timestamp(date_object)
         if delta.days > 0:
-            response = f"Next match is {fixture.team} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+            response = f"Next match is {fixture.team} in {delta.days} days, {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes on {discord_timestamp}"
         elif delta.days == 0:
-            response = f"Next match is {fixture.team} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes"
+            response = f"Next match is {fixture.team} in {delta.seconds//3600} hours, {(delta.seconds//60)%60} minutes on {discord_timestamp}"
         else:
             channel = discord.utils.get(interaction.guild.text_channels, name="live-games")
             response = f"There is a match playing right now! head over to <#{channel.id}>"
@@ -227,18 +234,6 @@ def getLocation(line):
         return 1
 
 
-def bst_flag():
-    """returns true if we are in bst"""
-    date_plus_7 = datetime.utcnow().date() + timedelta(days=7)
-    #BST falls between the last Sunday of march and the last sunday of october.
-    if (datetime.utcnow().date()).month > 3 and (datetime.utcnow().date()).month < 11:
-        return True
-    #to account for that last sunday, if I add seven to the last remaining dates in march and october, i could account for that
-    elif ((datetime.utcnow().date()).month) == 3 and (date_plus_7.month > 3 and date_plus_7.month < 11):
-        return True
-    else:
-        return False
-
 def parse_arsenal(gender="men"):
     """Gets the current arsenal fixtures"""
     if gender == "women":
@@ -267,7 +262,7 @@ def findResults(matches, number: int = 3):
     for match in matches:
         matchMonth = match.text.split('\n\n')[1].strip()
         matchMonth = datetime.strptime(matchMonth, '%B %Y')
-        currentDate = datetime.utcnow()
+        currentDate = datetime.now(timezone.utc)
         if matchMonth.year > currentDate.year or currentDate.month < matchMonth.month:
             continue
         #elseif match falls in the same month, but still in the future, skip it
