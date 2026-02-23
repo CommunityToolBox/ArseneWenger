@@ -51,3 +51,6 @@ If you have any features you would like to suggest or need any support, please d
 [closed-issues-url]: https://github.com/AndyReifman/ArseneWenger/issues?state=closed
 [license-shield]: https://img.shields.io/github/license/AndyReifman/ArseneWenger.svg?style=for-the-badge
 [license-url]: https://github.com/AndyReifman/ArseneWenger/blob/main/LICENSE
+
+## To Do List
+- add live feed command for Wengy
