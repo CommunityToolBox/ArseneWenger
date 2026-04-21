@@ -4,7 +4,7 @@ datetime==4.3
 tabulate==0.8.9
 Pillow==10.3.0
 pandas==2.2.3
-lxml==4.9.2
+lxml==6.1.0
 python-fotmob-wrapper==0.1.8
 requests==2.32.0
 beautifulsoup4==4.10.0
