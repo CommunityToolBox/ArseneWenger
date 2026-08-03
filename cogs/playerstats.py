@@ -143,6 +143,7 @@ class PlayerStatsCog(commands.Cog):
                 """,
                 inline=False
             )
+        print(embed.to_dict())
         await interaction.response.send_message(embed=embed)
 
 def getPlayerStats(club_id):

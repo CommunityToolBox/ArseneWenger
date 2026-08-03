@@ -1,0 +1,9 @@
+services:
+  arsene-wenger:
+    dockerfile: Dockerfile
+    container_name: wenger-bot-app
+    restart: always
+    volumes:
+      - type: bind
+        source: .
+        target: /arsenewenger
