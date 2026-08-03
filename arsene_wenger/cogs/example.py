@@ -5,8 +5,10 @@ An example cog to show how things should be done.
 
 Also provides a simple base for starting a new cog.
 """
+
 import discord
 from discord import app_commands
+
 # In this case, discord import is not needed, in some cases it may be.
 # import discord
 from discord.ext import commands
@@ -21,7 +23,7 @@ class ExampleCog(commands.Cog):
 
     @app_commands.command(
         name="ping",
-        description="The pong to your ping, let's you know that the bot is alive."
+        description="The pong to your ping, let's you know that the bot is alive.",
     )
     async def ping(self, interaction: discord.Interaction):
         """

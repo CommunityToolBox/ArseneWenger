@@ -1,9 +1,7 @@
-FROM python:3.10
+FROM python:3.14-slim
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-WORKDIR /arseneWenger
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+COPY . ./
+RUN uv sync
 
-COPY . .
-
-CMD ["python", "bot.py"]
+CMD ["uv", "run",  "arsene_wenger/bot.py"]

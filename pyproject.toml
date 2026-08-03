@@ -1,0 +1,18 @@
+[project]
+name = "arsene_wenger"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "bs4==0.0.1",
+    "datetime==4.3",
+    "discord-py==2.7.1",
+    "lxml>=6.1.1",
+    "pandas>=3.0.5",
+    "pillow>=12.3.0",
+    "python-fotmob-wrapper>=0.1.8",
+    "requests>=2.34.2",
+    "tabulate==0.8.9",
+]

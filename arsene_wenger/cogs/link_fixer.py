@@ -15,15 +15,16 @@ class LinkFixerCog(commands.Cog):
             "x.com": "www.fxtwitter.com",
             "tiktok.com": "www.vxtiktok.com",
             "instagram.com": "www.kkinstagram.com",
-            "reddit.com": "www.rxddit.com"
+            "reddit.com": "www.rxddit.com",
         }
+
     def rewrite_media_url(self, message, domain):
         parse_url = urlparse(message)
-        #return the value of the domain key in the embed_domains dictionary
+        # return the value of the domain key in the embed_domains dictionary
         return parse_url._replace(netloc=self.embed_domains[domain]).geturl()
 
     def find_urls(self, message, domain):
-        pattern = re.compile(rf'https?://(?:www\.)?(?:{domain})/\S+')
+        pattern = re.compile(rf"https?://(?:www\.)?(?:{domain})/\S+")
         return re.findall(pattern, message)
 
     @commands.Cog.listener()
@@ -32,19 +33,21 @@ class LinkFixerCog(commands.Cog):
             return
         # finds all links, we can limit this if we struggle with people spamming.
         for domain in self.embed_domains.keys():
-            if message.guild.name != 'gunners':
-                if domain == 'instagram.com':
+            if message.guild.name != "gunners":
+                if domain == "instagram.com":
                     break
             try:
                 urls = self.find_urls(message.content.lower(), domain)
             except IndexError:
-                logger.info(f'{message.content} does not contain any {domain} links')
+                logger.info(f"{message.content} does not contain any {domain} links")
             if urls:
                 original_urls = self.find_urls(message.content, domain)
                 url = original_urls[0]
                 new_url = self.rewrite_media_url(url, domain)
                 await message.edit(suppress=True)
-                await message.reply(f"Fx'ed that for you! {new_url}", mention_author=False)
+                await message.reply(
+                    f"Fx'ed that for you! {new_url}", mention_author=False
+                )
 
 
 async def setup(bot):

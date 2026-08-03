@@ -17,37 +17,37 @@ class Tables(commands.Cog):
         self.bot = bot
 
     @app_commands.command(
-        name="table",
-        description="Display the current Premier League Table."
+        name="table", description="Display the current Premier League Table."
     )
-    async def leagueTable(self, interaction: discord.Interaction,
-                          background: str = ''):
+    async def leagueTable(self, interaction: discord.Interaction, background: str = ""):
         body = livetable()
 
         # Check if (w)hite or (l)ight, else use dark mode
-        light_mode = background.startswith('l') or background.startswith('w')
+        light_mode = background.startswith("l") or background.startswith("w")
 
-        if (light_mode):
-            return await interaction.response.send_message(f"Light mode is not allowed, you spud.")
+        if light_mode:
+            return await interaction.response.send_message(
+                f"Light mode is not allowed, you spud."
+            )
 
         bg_colour = (47, 49, 54)
         font_colour = (255, 255, 255)
 
-        img = Image.new('RGB', (1130, 840), bg_colour)
+        img = Image.new("RGB", (1130, 840), bg_colour)
         d = ImageDraw.Draw(img)
         font = ImageFont.truetype("AnonymousPro.ttf", 36)
         d.text((5, 10), body, font_colour, font=font)
-        img.save('tempImg.jpg')
+        img.save("tempImg.jpg")
 
-        await interaction.response.send_message("EPL Standings", file=discord.File('tempImg.jpg'))
+        await interaction.response.send_message(
+            "EPL Standings", file=discord.File("tempImg.jpg")
+        )
 
-    @commands.command(
-        name="Europa",
-        help="Display the Europa League Table."
-    )
+    @commands.command(name="Europa", help="Display the Europa League Table.")
     async def europaTable(self, ctx):
         body = main()
-        await ctx.send('```' + body + '```')
+        await ctx.send("```" + body + "```")
+
 
 # Utility Functions for tables
 
@@ -70,14 +70,34 @@ def discordAbove(table, index, i):
         position = re.findall('<td class="pos">(.*)</td>', table[1])[0]
         goalDiff = re.findall('<td class="gd">(.*)</td>', table[1])[0]
         points = re.findall('<td class="pts">(.*)</td>', table[1])[0]
-        body += "| " + position + " |" + team + "|" + getSign(goalDiff) + "|" + points + "|\n"
+        body += (
+            "| "
+            + position
+            + " |"
+            + team
+            + "|"
+            + getSign(goalDiff)
+            + "|"
+            + points
+            + "|\n"
+        )
     else:
         for x in range(index, i):
             team = re.findall('a href=".*">(.*)<\/a>', table[x])[0]
             position = re.findall('<td class="pos">(.*)</td>', table[x])[0]
             goalDiff = re.findall('<td class="gd">(.*)</td>', table[x])[0]
             points = re.findall('<td class="pts">(.*)</td>', table[x])[0]
-            body += "| " + position + " |" + team + "|" + getSign(goalDiff) + "|" + points + "|\n"
+            body += (
+                "| "
+                + position
+                + " |"
+                + team
+                + "|"
+                + getSign(goalDiff)
+                + "|"
+                + points
+                + "|\n"
+            )
     return body
 
 
@@ -90,7 +110,17 @@ def discordBelow(table, index, i):
         position = re.findall('<td class="pos">(.*)</td>', table[x])[0]
         goalDiff = re.findall('<td class="gd">(.*)</td>', table[x])[0]
         points = re.findall('<td class="pts">(.*)</td>', table[x])[0]
-        body += "| " + position + " |" + team + "|" + getSign(goalDiff) + "|" + points + "|\n"
+        body += (
+            "| "
+            + position
+            + " |"
+            + team
+            + "|"
+            + getSign(goalDiff)
+            + "|"
+            + points
+            + "|\n"
+        )
     return body
 
 
@@ -103,7 +133,17 @@ def findArsenal(table):
             position = re.findall('<td class="pos">(.*)</td>', pos)[0]
             goalDiff = re.findall('<td class="gd">(.*)</td>', pos)[0]
             points = re.findall('<td class="pts">(.*)</td>', pos)[0]
-            body = "| " + position + " |" + team.upper() + "|" + getSign(goalDiff) + "|" + points + "|\n"
+            body = (
+                "| "
+                + position
+                + " |"
+                + team.upper()
+                + "|"
+                + getSign(goalDiff)
+                + "|"
+                + points
+                + "|\n"
+            )
     topRange = i + 2
     botRange = i - 2
     if botRange <= 1:
@@ -148,7 +188,7 @@ def shortenedClubNames(club):
         "Liverpool": "L'pool",
         "Fulham": "Fulham",
         "Nottingham Forest": "Forest",
-        "Bournemouth" : "Bournemouth"
+        "Bournemouth": "Bournemouth",
     }
     return clublist[club] if club in clublist else club
 
@@ -158,27 +198,27 @@ def livetable():
     x1 = requests.get(tableurl, stream=True)
     x2 = ""
     for lines in x1.iter_lines():
-        lines_d = lines.decode('utf-8')
+        lines_d = lines.decode("utf-8")
         x2 = x2 + lines_d
         if "tableCompetitionExplainedContainer" in lines_d:
             break
     tableslist = pd.read_html(x2)[0]
     rows = tableslist.to_numpy().tolist()
     i = 0
-    data = [['#', 'Team', 'Pl', 'W', 'D', 'L', 'GD', 'Pts']]
+    data = [["#", "Team", "Pl", "W", "D", "L", "GD", "Pts"]]
     while i < len(rows):
         tablerow = rows[i]
-        risefall = [tablerow[0].split(' ', 1)[0], tablerow[0].rsplit(' ', 1)[1]]
+        risefall = [tablerow[0].split(" ", 1)[0], tablerow[0].rsplit(" ", 1)[1]]
         if int(risefall[0]) < int(risefall[1]):
-            risefallind = '^ '
+            risefallind = "^ "
         elif int(risefall[0]) > int(risefall[1]):
-            risefallind = 'v '
+            risefallind = "v "
         else:
-            risefallind = '- '
+            risefallind = "- "
         pos = risefall[0]
         fullteamname = tablerow[1].rsplit(" ", 1)[0].strip()
         team = shortenedClubNames(fullteamname)
-        if team == 'Arsenal':
+        if team == "Arsenal":
             pos = "-> " + pos
         pl = tablerow[2]
         w = tablerow[3]
@@ -191,22 +231,33 @@ def livetable():
         i = i + 2
 
     tabulate.PRESERVE_WHITESPACE = False
-    table = tabulate.tabulate(data, headers='firstrow', tablefmt='pretty', colalign=('right', 'left',))
+    table = tabulate.tabulate(
+        data,
+        headers="firstrow",
+        tablefmt="pretty",
+        colalign=(
+            "right",
+            "left",
+        ),
+    )
     return table
+
 
 # EUROPA LEAGUE
 
 
 def buildTable(table):
     body = ""
-    for i in range(0,4):
-        team = re.findall('a href=".*">(.*)<\/a>',table[i])[0]
-        position = re.findall('<td class="pos">(.*)</td>',table[i])[0]
-        goalDiff = re.findall('<td class="gd">(.*)</td>',table[i])[0]
-        points = re.findall('<td class="pts">(.*)</td>',table[i])[0]
-        if team == 'Arsenal':
+    for i in range(0, 4):
+        team = re.findall('a href=".*">(.*)<\/a>', table[i])[0]
+        position = re.findall('<td class="pos">(.*)</td>', table[i])[0]
+        goalDiff = re.findall('<td class="gd">(.*)</td>', table[i])[0]
+        points = re.findall('<td class="pts">(.*)</td>', table[i])[0]
+        if team == "Arsenal":
             team = team.upper()
-        body += "|"+position+"|"+team+"|"+getSign(goalDiff)+"|"+points+"|\n"
+        body += (
+            "|" + position + "|" + team + "|" + getSign(goalDiff) + "|" + points + "|\n"
+        )
     return body
 
 
