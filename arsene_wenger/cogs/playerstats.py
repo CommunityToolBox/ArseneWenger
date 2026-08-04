@@ -1,11 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 A cog to give interesting player facts
 """
 
 import re
-from datetime import datetime
 
 import discord
 import pandas as pd
@@ -14,7 +11,6 @@ from bs4 import BeautifulSoup
 from discord import app_commands
 from discord.ext import commands
 from tabulate import tabulate
-
 from utils import current_season
 
 
@@ -123,7 +119,7 @@ class PlayerStatsCog(commands.Cog):
         if team.lower() not in self.CLUB_ID_TRANSLATIONS:
             return await interaction.response.send_message(
                 f"Sorry, I couldn't find a team with the name {team},\n"
-                f"allowed values are [{', '.join(name.title() for name in self.CLUB_ID_TRANSLATIONS.keys())}]"
+                f"allowed values are [{', '.join(name.title() for name in self.CLUB_ID_TRANSLATIONS)}]"
             )
 
         team_id = self.CLUB_ID_TRANSLATIONS[team.lower()][0]
@@ -147,14 +143,14 @@ class PlayerStatsCog(commands.Cog):
         if competition.lower() not in self.COMPETITION_TRANSLATIONS:
             return await interaction.response.send_message(
                 f"Sorry, I couldn't find a competition with the name {competition}, "
-                f"allowed values are [{', '.join(name.upper() for name in self.COMPETITION_TRANSLATIONS.keys())}]"
+                f"allowed values are [{', '.join(name.upper() for name in self.COMPETITION_TRANSLATIONS)}]"
             )
 
         competition_name = self.COMPETITION_TRANSLATIONS[competition.lower()]
         assists = getAssists(competition_name)
         embed = discord.Embed(color=0x9C824A, description=f"```{assists}```")
         embed.set_author(
-            name=f"Top assists for Arsenal",
+            name="Top assists for Arsenal",
             icon_url=self.CLUB_ID_TRANSLATIONS["arsenal"][1],
         )
 
@@ -176,7 +172,7 @@ class PlayerStatsCog(commands.Cog):
 
         """
         injured_players is a list of strings, example of each string:
-        
+
         PlayerThomas Partey
         ReasonThigh Injury
         Further DetailNov 10: 'He's progressing really well; it was a significant injury'
@@ -193,7 +189,7 @@ class PlayerStatsCog(commands.Cog):
             embed.add_field(
                 name=details[1].split("Player")[1],
                 value=f"""
-                > **Reason**: {details[2].split("Reason")[1]} 
+                > **Reason**: {details[2].split("Reason")[1]}
                 > **Details**: {details[3].split("Further Detail")[1]}
                 > **Potential Return**: {details[4].split("Potential Return")[1]}
                 > **Condition**: {details[5].split("Condition")[1]}
@@ -205,7 +201,7 @@ class PlayerStatsCog(commands.Cog):
 
 
 def getPlayerStats(club_id):
-    top_scorer = dict()
+    top_scorer = {}
     metrics_wanted = {
         "goals"
     }  # Can be expanded to other metrics like assists, minutes played etc

@@ -1,15 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 A cog to get transfers
 """
 
-from datetime import date
+import datetime
 
-import discord
 import requests
 from bs4 import BeautifulSoup
-from discord import app_commands
 from discord.ext import commands
 
 
@@ -37,7 +33,7 @@ def getSignings():
     Grab any signings made during the current transfer window
     """
     transfers = []
-    currentDate = date.today()
+    currentDate = datetime.datetime.now(tz=datetime.UTC).date()
     year = currentDate.year
     if currentDate.month < 5:
         year -= 1

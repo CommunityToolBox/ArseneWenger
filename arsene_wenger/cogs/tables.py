@@ -1,5 +1,4 @@
 # !/usr/bin/python
-# -*- coding: utf-8 -*-
 import re
 
 import discord
@@ -7,9 +6,9 @@ import pandas as pd
 import requests
 import requests.auth
 import tabulate
-from PIL import Image, ImageDraw, ImageFont
 from discord import app_commands
 from discord.ext import commands
+from PIL import Image, ImageDraw, ImageFont
 
 
 class Tables(commands.Cog):
@@ -23,11 +22,11 @@ class Tables(commands.Cog):
         body = livetable()
 
         # Check if (w)hite or (l)ight, else use dark mode
-        light_mode = background.startswith("l") or background.startswith("w")
+        light_mode = background.startswith(("l", "w"))
 
         if light_mode:
             return await interaction.response.send_message(
-                f"Light mode is not allowed, you spud."
+                "Light mode is not allowed, you spud."
             )
 
         bg_colour = (47, 49, 54)
@@ -66,7 +65,7 @@ def discordAbove(table, index, i):
     if index < 0:
         return body
     elif index == 0:
-        team = re.findall('a href=".*">(.*)<\/a>', table[1])[0]
+        team = re.findall(r'a href=".*">(.*)<\/a>', table[1])[0]
         position = re.findall('<td class="pos">(.*)</td>', table[1])[0]
         goalDiff = re.findall('<td class="gd">(.*)</td>', table[1])[0]
         points = re.findall('<td class="pts">(.*)</td>', table[1])[0]
@@ -83,7 +82,7 @@ def discordAbove(table, index, i):
         )
     else:
         for x in range(index, i):
-            team = re.findall('a href=".*">(.*)<\/a>', table[x])[0]
+            team = re.findall(r'a href=".*">(.*)<\/a>', table[x])[0]
             position = re.findall('<td class="pos">(.*)</td>', table[x])[0]
             goalDiff = re.findall('<td class="gd">(.*)</td>', table[x])[0]
             points = re.findall('<td class="pts">(.*)</td>', table[x])[0]
@@ -103,10 +102,9 @@ def discordAbove(table, index, i):
 
 def discordBelow(table, index, i):
     body = ""
-    if index < 5:
-        index = 5
+    index = max(index, 5)
     for x in range(i + 1, index + 1):
-        team = re.findall('a href=".*">(.*)<\/a>', table[x])[0]
+        team = re.findall(r'a href=".*">(.*)<\/a>', table[x])[0]
         position = re.findall('<td class="pos">(.*)</td>', table[x])[0]
         goalDiff = re.findall('<td class="gd">(.*)</td>', table[x])[0]
         points = re.findall('<td class="pts">(.*)</td>', table[x])[0]
@@ -127,7 +125,7 @@ def discordBelow(table, index, i):
 def findArsenal(table):
     header = "| Pos |  Team  | GD | Pts |\n"
     for index, pos in enumerate(table):
-        team = re.findall('a href=".*">(.*)<\/a>', pos)[0]
+        team = re.findall(r'a href=".*">(.*)<\/a>', pos)[0]
         if team == "Arsenal":
             i = index
             position = re.findall('<td class="pos">(.*)</td>', pos)[0]
@@ -190,7 +188,7 @@ def shortenedClubNames(club):
         "Nottingham Forest": "Forest",
         "Bournemouth": "Bournemouth",
     }
-    return clublist[club] if club in clublist else club
+    return clublist.get(club, club)
 
 
 def livetable():
@@ -248,8 +246,8 @@ def livetable():
 
 def buildTable(table):
     body = ""
-    for i in range(0, 4):
-        team = re.findall('a href=".*">(.*)<\/a>', table[i])[0]
+    for i in range(4):
+        team = re.findall(r'a href=".*">(.*)<\/a>', table[i])[0]
         position = re.findall('<td class="pos">(.*)</td>', table[i])[0]
         goalDiff = re.findall('<td class="gd">(.*)</td>', table[i])[0]
         points = re.findall('<td class="pts">(.*)</td>', table[i])[0]
@@ -259,14 +257,6 @@ def buildTable(table):
             "|" + position + "|" + team + "|" + getSign(goalDiff) + "|" + points + "|\n"
         )
     return body
-
-
-def parseWebsite():
-    website = "http://www.espnfc.us/uefa-europa-league/2310/group/8/group-h"
-    tableWebsite = requests.get(website, timeout=15)
-    table_html = tableWebsite.text
-    table = table_html.split('<tr style="background-color:')[1:]
-    return table
 
 
 def main():

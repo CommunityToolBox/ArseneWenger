@@ -1,14 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 A cog to spit back random lines from files
 """
 
-import discord
-from discord.ext import commands
-from discord import app_commands
 import random
 
+import discord
+from discord import app_commands
+from discord.ext import commands
 from utils import getTimestamp
 
 
