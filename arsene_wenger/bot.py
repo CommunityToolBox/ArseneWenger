@@ -6,7 +6,9 @@ import sys
 import discord
 from discord.ext import commands
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 if not os.path.isfile("config.json"):
     sys.exit("'Config file not found! Please add it and try again.")
@@ -22,17 +24,17 @@ intents.message_content = True
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(command_prefix=config['prefix'], intents=intents)
+        super().__init__(command_prefix=config["prefix"], intents=intents)
 
     async def startup(self):
         await bot.wait_until_ready()
         await bot.tree.sync()
-        await bot.change_presence(activity=discord.Game(name='Wengerball'))
-        logging.info('Successfully synced applications commands')
-        logging.info(f'Connected as {bot.user}')
+        await bot.change_presence(activity=discord.Game(name="Wengerball"))
+        logging.info("Successfully synced applications commands")
+        logging.info(f"Connected as {bot.user}")
 
     async def setup_hook(self):
-        for filename in os.listdir("./cogs"):
+        for filename in os.listdir("arsene_wenger/cogs"):
             if filename.endswith(".py"):
                 try:
                     await bot.load_extension(f"cogs.{filename[:-3]}")

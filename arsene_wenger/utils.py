@@ -8,10 +8,23 @@ def getTimestamp():
     Utility function to get a nicely formatted timestamp
     :return: Returns date and time in the following format "DD/MM [HH:MM]"
     """
-    dt = str(datetime.datetime.now().month) + '/' + str(datetime.datetime.now().day) + ' '
-    hr = str(datetime.datetime.now().hour) if len(str(datetime.datetime.now().hour)) > 1 else '0' + str(datetime.datetime.now().hour)
-    min = str(datetime.datetime.now().minute) if len(str(datetime.datetime.now().minute)) > 1 else '0' + str(datetime.datetime.now().minute)
-    t = '[' + hr + ':' + min + '] '
+    dt = (
+        str(datetime.datetime.now().month)
+        + "/"
+        + str(datetime.datetime.now().day)
+        + " "
+    )
+    hr = (
+        str(datetime.datetime.now().hour)
+        if len(str(datetime.datetime.now().hour)) > 1
+        else "0" + str(datetime.datetime.now().hour)
+    )
+    min = (
+        str(datetime.datetime.now().minute)
+        if len(str(datetime.datetime.now().minute)) > 1
+        else "0" + str(datetime.datetime.now().minute)
+    )
+    t = "[" + hr + ":" + min + "] "
     return dt + t
 
 
@@ -29,6 +42,7 @@ def clamp_int(value, minimum, maximum):
         value = maximum
     return value
 
+
 def current_season() -> str:
     """
     Returns a season string i.e. 2022-2023, 2023-2024
@@ -40,6 +54,7 @@ def current_season() -> str:
         return f"{now.year}-{now.year + 1}"
     else:
         return f"{now.year - 1}-{now.year}"
+
 
 def make_discord_timestamp(value: datetime.datetime) -> str:
     """
