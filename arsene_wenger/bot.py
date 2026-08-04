@@ -1,14 +1,18 @@
+#!/usr/bin/env python
 import json
 import logging
 import os
 import sys
 
 import discord
+from discord.errors import DiscordException
 from discord.ext import commands
 
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s"
 )
+
+logger = logging.getLogger(__name__)
 
 if not os.path.isfile("config.json"):
     sys.exit("'Config file not found! Please add it and try again.")
@@ -30,18 +34,18 @@ class Bot(commands.Bot):
         await bot.wait_until_ready()
         await bot.tree.sync()
         await bot.change_presence(activity=discord.Game(name="Wengerball"))
-        logging.info("Successfully synced applications commands")
-        logging.info(f"Connected as {bot.user}")
+        logger.info("Successfully synced applications commands")
+        logger.info(f"Connected as {bot.user}")
 
     async def setup_hook(self):
         for filename in os.listdir("arsene_wenger/cogs"):
             if filename.endswith(".py"):
                 try:
                     await bot.load_extension(f"cogs.{filename[:-3]}")
-                    logging.info(f"Loaded {filename}")
-                except Exception as e:
-                    logging.error(f"Failed to load {filename}")
-                    logging.error(f"[ERROR] {e}")
+                    logger.info(f"Loaded {filename}")
+                except DiscordException as e:
+                    logger.error(f"Failed to load {filename}")
+                    logger.error(f"[ERROR] {e}")
 
         self.loop.create_task(self.startup())
 

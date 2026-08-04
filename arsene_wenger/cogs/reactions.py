@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 A simple cog that adds certain reactions to messages
 """
@@ -38,11 +36,10 @@ class ReactionsCog(commands.Cog):
                     for element in reaction:
                         await message.add_reaction(element)
                 else:
-                    if message.guild.name != "gunners":
-                        if any(
-                            msg in content for msg in ["tottenham", "spurs", "spuds"]
-                        ):
-                            return
+                    if message.guild.name != "gunners" and any(
+                        msg in content for msg in ["tottenham", "spurs", "spuds"]
+                    ):
+                        return
                     await message.add_reaction(reaction)
 
 

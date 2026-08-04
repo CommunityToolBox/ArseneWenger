@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 A moderation cog to automate deletion and moderation of messages
 """
@@ -48,12 +46,12 @@ class ModerationCog(commands.Cog):
         if any(ele in msg_lower for ele in self.banned):
             await message.delete()
             await message.channel.send(
-                f"Sorry {str(message.author)} that source is not allowed."
+                f"Sorry {message.author!s} that source is not allowed."
             )
         elif self.check_invite(msg_lower):
             await message.delete()
             await message.channel.send(
-                f"Sorry {str(message.author.display_name)} invites are not allowed."
+                f"Sorry {message.author.display_name!s} invites are not allowed."
             )
 
     @commands.command(name="clear", help="Clears messages")

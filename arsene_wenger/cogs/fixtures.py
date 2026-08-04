@@ -1,19 +1,17 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 A cog with useful commands around fixtures
 """
 
+import datetime
+
 import discord
-import requests, requests.auth
-from bs4 import BeautifulSoup
-from fotmob import fotmob
-from datetime import datetime, timedelta
-from datetime import date
-from datetime import timezone
-from discord.ext import commands
-from discord import app_commands
 import pytz
+import requests
+import requests.auth
+from bs4 import BeautifulSoup
+from discord import app_commands
+from discord.ext import commands
+from fotmob import fotmob
 
 if __name__ != "__main__":
     from utils import clamp_int, make_discord_timestamp
@@ -30,6 +28,7 @@ class FixturesCog(commands.Cog):
         count = clamp_int(count, 1, 20)
         fixtures = parse_arsenal(team_type)
         fixture_list = findFixtures(fixtures, count)
+        date = datetime.datetime.now(tz=datetime.UTC)
 
         embed = discord.Embed(color=0x9C824A)
 
@@ -45,7 +44,7 @@ class FixturesCog(commands.Cog):
                 if not ((date.today()).month >= 8 and "jan" in fixture.date.lower())
                 else (date.today()).year + 1
             )
-            date_object = datetime.strptime(
+            date_object = datetime.datetime.strptime(
                 f"{fixture.date} {year} {fixture.time}", "%a %b %d %Y %H:%M"
             )  # local london time
             date_object = pytz.timezone("Europe/London").localize(date_object)
@@ -82,6 +81,7 @@ class FixturesCog(commands.Cog):
         """generates the embed for the next and wnext commands"""
         fixtures = parse_arsenal(team_type)
         fixture = findFixtures(fixtures, 1)[0]
+        date = datetime.datetime.now(tz=datetime.UTC)
         if (date.today()).month == 12 and "jan" in fixture.date.lower():
             next_match_date = (
                 f"""{fixture.date} {date.today().year + 1}  {fixture.time}"""
@@ -92,14 +92,14 @@ class FixturesCog(commands.Cog):
             )
 
         # next_match_date example: Wed Nov 29 2023 20:00
-        date_object = datetime.strptime(
+        date_object = datetime.datetime.strptime(
             next_match_date, "%a %b %d %Y %H:%M"
         )  # local london time
         # convert date_object to utc
         london = pytz.timezone("Europe/London")
         date_object = london.localize(date_object)
         date_object = date_object.astimezone(pytz.utc)
-        delta = date_object - datetime.now(timezone.utc)
+        delta = date_object - datetime.datetime.now(tz=datetime.UTC)
         discord_timestamp = make_discord_timestamp(date_object)
         if delta.days > 0:
             response = f"Next match is {fixture.team} in {delta.days} days, {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
@@ -269,15 +269,16 @@ def findResults(matches, number: int = 3):
     matches.reverse()
     for match in matches:
         matchMonth = match.text.split("\n\n")[1].strip()
-        matchMonth = datetime.strptime(matchMonth, "%B %Y")
-        currentDate = datetime.now(timezone.utc)
-        if matchMonth.year > currentDate.year or currentDate.month < matchMonth.month:
-            continue
-        # elseif match falls in the same month, but still in the future, skip it
-        elif (
-            matchMonth.year == currentDate.year
-            and currentDate.month == matchMonth.month
-            and currentDate.day < matchMonth.day
+        matchMonth = datetime.datetime.strptime(matchMonth, "%B %Y")
+        currentDate = datetime.datetime.now(tz=datetime.UTC)
+        if (
+            matchMonth.year > currentDate.year
+            or currentDate.month < matchMonth.month
+            or (
+                matchMonth.year == currentDate.year
+                and currentDate.month == matchMonth.month
+                and currentDate.day < matchMonth.day
+            )
         ):
             continue
         # the rest can be split by \n\n\n
@@ -290,7 +291,6 @@ def findResults(matches, number: int = 3):
             # example arr: Wed Aug 2 - 18:00\n\n  Arsenal\n          \n 1 - 1\n\n  Monaco\n          \nEmirates Cup
             resultDate = arr.split("\n\n")[0].strip()
             resultDate = datetime.strptime(resultDate, "%a %b %d - %H:%M")
-            twoHoursFromNow = currentDate + timedelta(hours=2)
             if resultDate.day >= currentDate.day:
                 continue
             matchObj = parseResultArray(arr)
@@ -420,7 +420,7 @@ def getInternationalCup(
     """Gets the current international cup progression"""
     matches = []
     body = ""
-    today = datetime.today().strftime("%Y%m%d")
+    today = datetime.datetime.now(tz=datetime.UTC).strftime("%Y%m%d")
     while len(matches) < 5 and int(today) < endDate:
         fixtures = fotmob.getLeague(leagueCode, "overview", "league", "UTC", today)
         for match in fixtures[:5]:

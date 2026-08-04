@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import datetime
 
 
@@ -8,22 +6,10 @@ def getTimestamp():
     Utility function to get a nicely formatted timestamp
     :return: Returns date and time in the following format "DD/MM [HH:MM]"
     """
-    dt = (
-        str(datetime.datetime.now().month)
-        + "/"
-        + str(datetime.datetime.now().day)
-        + " "
-    )
-    hr = (
-        str(datetime.datetime.now().hour)
-        if len(str(datetime.datetime.now().hour)) > 1
-        else "0" + str(datetime.datetime.now().hour)
-    )
-    min = (
-        str(datetime.datetime.now().minute)
-        if len(str(datetime.datetime.now().minute)) > 1
-        else "0" + str(datetime.datetime.now().minute)
-    )
+    now = datetime.datetime.now(tz=datetime.UTC)
+    dt = str(now.month) + "/" + str(now.day) + " "
+    hr = str(now.hour) if len(str(now.hour)) > 1 else "0" + str(now.hour)
+    min = str(now.minute) if len(str(now.minute)) > 1 else "0" + str(now.minute)
     t = "[" + hr + ":" + min + "] "
     return dt + t
 
@@ -49,7 +35,7 @@ def current_season() -> str:
 
     We check whether we are in a season typically between August and May
     """
-    now = datetime.datetime.now()
+    now = datetime.datetime.now(tz=datetime.UTC)
     if now.month >= 8 or now.month <= 5:
         return f"{now.year}-{now.year + 1}"
     else:

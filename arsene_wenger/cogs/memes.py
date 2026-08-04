@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """
 A cog with meme commands
 """
@@ -9,7 +7,6 @@ import random
 import discord
 from discord import app_commands
 from discord.ext import commands
-
 from utils import clamp_int
 
 
@@ -25,7 +22,7 @@ class MemeCog(commands.Cog):
         length = clamp_int(length, 1, 10)
 
         body = "<:ArseneTop:522209469547937802>\n"
-        for i in range(0, length):
+        for i in range(length):
             body += "<:ArseneMid:522209585403265045>\n"
         body += "<:ArseneBot:522209598464196608>\n"
         await interaction.response.send_message(body)
