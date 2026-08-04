@@ -5,7 +5,9 @@ A cog with useful commands around fixtures
 """
 
 import discord
-import requests, requests.auth
+import pytz
+import requests
+import requests.auth
 from bs4 import BeautifulSoup
 from fotmob import fotmob
 from datetime import datetime, timedelta
@@ -246,7 +248,7 @@ def parse_arsenal(gender="men"):
     if gender == "women":
         url = "https://www.arsenal.com/results-and-fixtures-list?field_arsenal_team_target_id=5"
     else:
-        url = "https://www.arsenal.com/results-and-fixtures-list?"
+        url = "https://www.arsenal.com/fixtures/men/printable/20262027"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "

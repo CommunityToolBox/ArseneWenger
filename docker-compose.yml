@@ -1,6 +1,7 @@
 services:
   arsene-wenger:
-    dockerfile: Dockerfile
+    build:
+      dockerfile: Dockerfile
     container_name: wenger-bot-app
     restart: always
     volumes:
