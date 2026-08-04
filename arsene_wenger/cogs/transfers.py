@@ -14,14 +14,14 @@ from discord.ext import commands
 
 
 class TransfersCogs(commands.Cog):
-
     def __init__(self, bot):
         """Save our bot argument that is passed in to the class."""
         self.bot = bot
 
     @commands.command(
         name="anysignings",
-        help="Get Arsenal signings for the current transfer window/season")
+        help="Get Arsenal signings for the current transfer window/season",
+    )
     async def signings(self, ctx):
         players = ""
         if "None" not in getSignings():
@@ -47,9 +47,13 @@ def getSignings():
         season = "s"
     else:
         season = ""
-    address = "https://www.transfermarkt.us/arsenal-fc/transfers/verein/11/plus/1?saison_id=" + str(
-        year) + "&pos=&detailpos=&w_s=" + season
-    website = requests.get(address, headers={'User-Agent': 'Custom'})
+    address = (
+        "https://www.transfermarkt.us/arsenal-fc/transfers/verein/11/plus/1?saison_id="
+        + str(year)
+        + "&pos=&detailpos=&w_s="
+        + season
+    )
+    website = requests.get(address, headers={"User-Agent": "Custom"})
     soup = BeautifulSoup(website.text, "lxml")
     soup = soup.findAll("div", {"class": "box"})[2]
     table = soup.find("div", {"class": "responsive-table"})
@@ -57,13 +61,21 @@ def getSignings():
     status = ""
     if table is None:
         return ["None"]
-    for row in table.findAll("tr", {"class": ['odd', 'even']}):
+    for row in table.findAll("tr", {"class": ["odd", "even"]}):
         try:
-            status = row.find("td", {"class": "rechts hauptlink"}).find_all('a', href=True)[0].getText()
+            status = (
+                row.find("td", {"class": "rechts hauptlink"})
+                .find_all("a", href=True)[0]
+                .getText()
+            )
         except AttributeError:
             print("blank row")
         if "End of loan" not in status:
-            transfers.append(row.find("td", {"class": "hauptlink"}).find_all('a', href=True)[0].getText())
+            transfers.append(
+                row.find("td", {"class": "hauptlink"})
+                .find_all("a", href=True)[0]
+                .getText()
+            )
     return transfers
 
 

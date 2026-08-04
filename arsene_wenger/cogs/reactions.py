@@ -3,6 +3,7 @@
 """
 A simple cog that adds certain reactions to messages
 """
+
 from discord.ext import commands
 
 
@@ -14,19 +15,19 @@ class ReactionsCog(commands.Cog):
         self.bot = bot
 
         self.reactions = {
-            'tottenham': '\U0001F4A9',
-            'citeh': ['⏸️','5️⃣','\U0001F1EB', '\U0001F1E8' ],
-            'man city': ['⏸️','5️⃣','\U0001F1EB', '\U0001F1E8' ],
-            'manchester city': ['⏸️','5️⃣','\U0001F1EB', '\U0001F1E8' ],
-            'spurs': '\U0001F4A9',
-            'spuds': '\U0001F4A9',
-            'mustafi': ['🔙', '🔛', '🔝'],
-            '<:ornstein:346679834501709824>': ['❤', 'ozgasm:332570750290755586'],
-            'brexit': 'brexit:521984465132847104',
-            '<:feelsarsenalman:522208659443417099>': 'feelsarsenalman:522208659443417099',
-            '<:feelsinvincibleman:375919858845483008>': ':feelsinvincibleman:375919858845483008',
-            '<:nelson:346679834090668034>': 'Bossielny:346679834535264257',
-            'sanchez': 'rekt:406186499802136597'
+            "tottenham": "\U0001f4a9",
+            "citeh": ["⏸️", "5️⃣", "\U0001f1eb", "\U0001f1e8"],
+            "man city": ["⏸️", "5️⃣", "\U0001f1eb", "\U0001f1e8"],
+            "manchester city": ["⏸️", "5️⃣", "\U0001f1eb", "\U0001f1e8"],
+            "spurs": "\U0001f4a9",
+            "spuds": "\U0001f4a9",
+            "mustafi": ["🔙", "🔛", "🔝"],
+            "<:ornstein:346679834501709824>": ["❤", "ozgasm:332570750290755586"],
+            "brexit": "brexit:521984465132847104",
+            "<:feelsarsenalman:522208659443417099>": "feelsarsenalman:522208659443417099",
+            "<:feelsinvincibleman:375919858845483008>": ":feelsinvincibleman:375919858845483008",
+            "<:nelson:346679834090668034>": "Bossielny:346679834535264257",
+            "sanchez": "rekt:406186499802136597",
         }
 
     @commands.Cog.listener()
@@ -37,8 +38,10 @@ class ReactionsCog(commands.Cog):
                     for element in reaction:
                         await message.add_reaction(element)
                 else:
-                    if message.guild.name != 'gunners':
-                        if any(msg in content for msg in ['tottenham', 'spurs', 'spuds']):
+                    if message.guild.name != "gunners":
+                        if any(
+                            msg in content for msg in ["tottenham", "spurs", "spuds"]
+                        ):
                             return
                     await message.add_reaction(reaction)
 
