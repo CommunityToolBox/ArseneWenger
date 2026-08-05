@@ -3,18 +3,32 @@ A cog with useful commands around fixtures
 """
 
 import datetime
+import logging
+import re
+from typing import Literal
 
 import discord
-import pytz
 import requests
 import requests.auth
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, ResultSet, Tag
 from discord import app_commands
 from discord.ext import commands
 from fotmob import fotmob
+from pydantic import BaseModel
 
 if __name__ != "__main__":
     from utils import clamp_int, make_discord_timestamp
+
+logger = logging.getLogger(__name__)
+
+
+class Fixture(BaseModel):
+    date: datetime.datetime
+    opponent: str
+    location: Literal["Home", "Away"]
+    competition: str
+    scoreline: str = ""
+    result: Literal["W", "L", "D"]
 
 
 class FixturesCog(commands.Cog):
@@ -25,10 +39,16 @@ class FixturesCog(commands.Cog):
     async def generate_fixtures_embed(
         self, interaction: discord.Interaction, team_type: str, count: int = 3
     ):
+        """Create an embed for the requested team and number of fixtures
+
+        Args:
+            interaction: The received discord message
+            team_type: men or women's team
+            count: number of fixtures to use
+        """
         count = clamp_int(count, 1, 20)
         fixtures = parse_arsenal(team_type)
-        fixture_list = findFixtures(fixtures, count)
-        date = datetime.datetime.now(tz=datetime.UTC)
+        fixture_list = find_fixtures(fixtures, count)
 
         embed = discord.Embed(color=0x9C824A)
 
@@ -39,20 +59,9 @@ class FixturesCog(commands.Cog):
         )
 
         for fixture in fixture_list:
-            year = (
-                (date.today()).year
-                if not ((date.today()).month >= 8 and "jan" in fixture.date.lower())
-                else (date.today()).year + 1
-            )
-            date_object = datetime.datetime.strptime(
-                f"{fixture.date} {year} {fixture.time}", "%a %b %d %Y %H:%M"
-            )  # local london time
-            date_object = pytz.timezone("Europe/London").localize(date_object)
-            discord_aware_stamp = make_discord_timestamp(
-                date_object.astimezone(pytz.utc)
-            )
+            discord_aware_stamp = make_discord_timestamp(fixture.date)
             embed.add_field(
-                name=f"{fixture.team} - {fixture.comp}",
+                name=f"{fixture.opponent} - {fixture.competition}",
                 value=f"{discord_aware_stamp}",
                 inline=False,
             )
@@ -64,6 +73,7 @@ class FixturesCog(commands.Cog):
     )
     async def fixtures(self, interaction: discord.Interaction, count: int = 3):
         # defer
+        logger.info("Received /fixtures request")
         await interaction.response.defer()
         await self.generate_fixtures_embed(interaction, "", count)
 
@@ -80,31 +90,15 @@ class FixturesCog(commands.Cog):
     ):
         """generates the embed for the next and wnext commands"""
         fixtures = parse_arsenal(team_type)
-        fixture = findFixtures(fixtures, 1)[0]
+        fixture = find_fixtures(fixtures, 1)[0]
         date = datetime.datetime.now(tz=datetime.UTC)
-        if (date.today()).month == 12 and "jan" in fixture.date.lower():
-            next_match_date = (
-                f"""{fixture.date} {date.today().year + 1}  {fixture.time}"""
-            )
-        else:
-            next_match_date = (
-                f"""{fixture.date} {(date.today()).year}  {fixture.time}"""
-            )
 
-        # next_match_date example: Wed Nov 29 2023 20:00
-        date_object = datetime.datetime.strptime(
-            next_match_date, "%a %b %d %Y %H:%M"
-        )  # local london time
-        # convert date_object to utc
-        london = pytz.timezone("Europe/London")
-        date_object = london.localize(date_object)
-        date_object = date_object.astimezone(pytz.utc)
-        delta = date_object - datetime.datetime.now(tz=datetime.UTC)
-        discord_timestamp = make_discord_timestamp(date_object)
+        delta = fixture.date - date
+        discord_timestamp = make_discord_timestamp(fixture.date)
         if delta.days > 0:
-            response = f"Next match is {fixture.team} in {delta.days} days, {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
+            response = f"Next match is {fixture.opponent} in {delta.days} days, {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
         elif delta.days == 0:
-            response = f"Next match is {fixture.team} in {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
+            response = f"Next match is {fixture.opponent} in {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
         else:
             channel = discord.utils.get(
                 interaction.guild.text_channels, name="live-games"
@@ -150,7 +144,7 @@ class FixturesCog(commands.Cog):
     ):
         count = clamp_int(count, 1, 10)
         fixtures = parse_arsenal(team_type)
-        result_list = findResults(fixtures, count)
+        result_list = find_results(fixtures, count)
 
         embed = discord.Embed(color=0x9C824A)
 
@@ -161,16 +155,16 @@ class FixturesCog(commands.Cog):
 
         for result in result_list:
             # add green check mark if won, red x if lost, light gray circle if draw
-            if result.wonOrLost == "W":
+            if result.result == "W":
                 icon = "✅"
-            elif result.wonOrLost == "L":
+            elif result.result == "L":
                 icon = "❌"
             else:
                 icon = "⬜"
 
             embed.add_field(
-                name=f"{icon} against {result.team} - {result.comp}",
-                value=f"{result.date} {result.time} | {result.score} | ",
+                name=f"{icon} against {result.opponent} - {result.competition}",
+                value=f"{result.date} | {result.scoreline} | ",
                 inline=False,
             )
 
@@ -209,44 +203,22 @@ class FixturesCog(commands.Cog):
 i = 0
 
 
-class Match:
-    def __init__(self, date, time, team, comp):
-        self.date = date
-        self.time = time
-        self.team = team
-        self.comp = comp
-
-
-class Result:
-    def __init__(self, date, time, team, comp, score, wonOrLost):
-        self.date = date
-        self.time = time
-        self.team = team
-        self.comp = comp
-        self.score = score
-        self.wonOrLost = wonOrLost
-
-
 def getTeamName(team_type: str):
     """returns the team name based on the team type"""
     team_name = "Women's" if team_type == "women" else "Men's"
     return team_name
 
 
-def getLocation(line):
-    homeTeam = line[0].text.strip()
-    if "Arsenal" in homeTeam:
-        return 0
-    else:
-        return 1
+def parse_arsenal(gender="men") -> ResultSet[Tag]:
+    """Gets the current arsenal fixtures
 
-
-def parse_arsenal(gender="men"):
-    """Gets the current arsenal fixtures"""
+    Returns:
+        A BeautifulSoup ResultSet containing all matches for the season.
+    """
     if gender == "women":
         url = "https://www.arsenal.com/results-and-fixtures-list?field_arsenal_team_target_id=5"
     else:
-        url = "https://www.arsenal.com/results-and-fixtures-list?"
+        url = "https://www.arsenal.com/fixtures/men/printable/20262027"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -256,162 +228,188 @@ def parse_arsenal(gender="men"):
     # Example Table Class:
     response = requests.get(url, timeout=15, headers=headers).text
     soup = BeautifulSoup(response, "lxml")
-    table = soup.select_one('div[class*="results-fixure--slimline"]')
-    # find all table class="cols-0"
-    matches = table.findAll("table", attrs={"class": "cols-0"})
+    matches = soup.find_all(
+        "div", class_=re.compile("printable_printable_hero_box__.*")
+    )
     return matches
 
 
-def findResults(matches, number: int = 3):
-    """takes the matches and returns the previous number of results"""
+def parse_result(match: Tag) -> str:
+    """Grabs the scoreline from a match
+
+    Args:
+        match: bs4 tag of a match
+    Returns:
+        A basic scoreline matching x - x format
+    """
+    result = match.find(
+        "div", class_=re.compile("printable_printable_hero_box_details__.*")
+    )
+    if not result:
+        raise ValueError(f"Unable to parse scoreline from match '{match}'")
+    scores = result.find(
+        "div", class_=re.compile("printable_printable_hero_box_details_result__.*")
+    )
+    if scores:
+        return scores.text
+
+
+def find_results(matches: ResultSet[Tag], number: int = 3) -> list[Fixture]:
+    """Takes the matches and returns the previous number of results
+
+    Args:
+        matches: A ResultSet containing the html of the fixtures table
+        number: Number of previous results to return
+
+    Returns:
+        A list of previous results
+    """
+    next_match_int = find_next_match(matches)
+    if next_match_int != -1:
+        # Remove all fixtures we haven't played yet
+        matches = ResultSet(source=None, result=matches[:next_match_int])
     results = []
     # reverse matches so we're working backwards
     matches.reverse()
     for match in matches:
-        matchMonth = match.text.split("\n\n")[1].strip()
-        matchMonth = datetime.datetime.strptime(matchMonth, "%B %Y")
-        currentDate = datetime.datetime.now(tz=datetime.UTC)
-        if (
-            matchMonth.year > currentDate.year
-            or currentDate.month < matchMonth.month
-            or (
-                matchMonth.year == currentDate.year
-                and currentDate.month == matchMonth.month
-                and currentDate.day < matchMonth.day
+        date = parse_date(match)
+        (opponent, location) = parse_opponent(match)
+        competition_parsed = match.find(
+            "div", class_=re.compile("printable_printable_hero_box_type__.*")
+        )
+        if competition_parsed:
+            competition = competition_parsed.text
+        scoreline = parse_result(match)
+        result = get_won_or_lost(scoreline, location)
+        results += [
+            Fixture(
+                date=date,
+                opponent=opponent,
+                location=location,
+                competition=competition,
+                scoreline=scoreline,
+                result=result,
             )
-        ):
-            continue
-        # the rest can be split by \n\n\n
-        resultsArray = match.text.split("\n\n\n")
-        resultsArray.pop(0)
-        resultsArray.pop(-1)
-        resultsArray.reverse()
-        for arr in resultsArray:
-            # check if the match is in the future, if it is, skip it
-            # example arr: Wed Aug 2 - 18:00\n\n  Arsenal\n          \n 1 - 1\n\n  Monaco\n          \nEmirates Cup
-            resultDate = arr.split("\n\n")[0].strip()
-            resultDate = datetime.strptime(resultDate, "%a %b %d - %H:%M")
-            if resultDate.day >= currentDate.day:
-                continue
-            matchObj = parseResultArray(arr)
-            results += [matchObj]
-            if len(results) >= number:
-                return results
+        ]
+        if len(results) >= number:
+            return results
     return results
 
 
-def findFixtures(matches, number: int):
-    """Takes the matches and returns the next number of fixtures"""
+def parse_date(match):
+    """Return a datetime for the given match
+
+    Args:
+        match: A specific match from the Resultset
+    Returns:
+        Datetimeobject of the match date
+    """
+    date_string = match.find(
+        "div", class_=re.compile("printable_printable_hero_box_date.*")
+    ).text
+    parsed = datetime.datetime.strptime(date_string, "%a %b %d - %H:%M").replace(
+        tzinfo=datetime.UTC
+    )
+    current_year = datetime.datetime.now(tz=datetime.UTC).year
+    target_year = current_year if parsed.month >= 7 else current_year + 1
+    date = parsed.replace(year=target_year)
+    return date
+
+
+def parse_opponent(match: Tag) -> tuple:
+    """Find the opponent and match location
+
+    Args:
+        match: Bs4 Tag containing match participants
+
+    Returns:
+        a tuple containing the opponent name and if the match is Home or Away
+    """
+    details = match.find("div", class_="printable_printable_hero_box_details__JTszY")
+    if not details:
+        raise ValueError(f"Unable to parse teams for fixture: {match}")
+    home = details.find(
+        "div", class_=re.compile("printable_printable_hero_box_details_comp1.*")
+    )
+    away = details.find(
+        "div", class_=re.compile("printable_printable_hero_box_details_comp2.*")
+    )
+    if home:
+        home = home.text
+    if away:
+        away = away.text
+    if home == "Arsenal":
+        return (away, "Home")
+    else:
+        return (home, "Away")
+
+
+def find_next_match(matches: ResultSet) -> int:
+    """Return the index of the last match without a result
+
+    Args:
+        matches: ResultSet containing all matches of the season
+
+    Returns:
+        The index in matches for the next fixture to be played
+    """
+    today = datetime.datetime.now(tz=datetime.UTC)
+    for i, match in enumerate(matches):
+        date = parse_date(match)
+        if date >= today:
+            return i
+    # If we get here then the season is over and there are no more fixtures
+    return -1
+
+
+def find_fixtures(matches: ResultSet[Tag], number: int) -> list[Fixture]:
+    """Takes the matches and returns the next number of fixtures
+
+    Args:
+        matches: A ResultSet containing the html of the table
+        number: Number of next fixtures to return
+
+    Returns:
+        A list of upcoming fixtures
+
+    """
+    # matches contains all matches of the season so we should skip all the matches we've played
+    next_match_int = find_next_match(matches)
+    if next_match_int == -1:
+        return []
     fixtures = []
-    for match in matches:
-        # match.text is the text of the table, will need to parse this
-        #'\n\n          August 2023\n            \n\n\nWed Aug 2 - 18:00\n\n  Arsenal\n          \n 1 - 1\n\n  Monaco\n          \nEmirates Cup          \n\n\nSun Aug 6 - 16:00\n\n  Manchester City\n          \n 1 - 1\n\n  Arsenal\n          \nFA Community Shield          \n\n\nSat Aug 12 - 13:00\n\n  Arsenal\n          \n 2 - 1\n\n  Nottingham Forest\n          \nPremier League          \n\n\nMon Aug 21 - 20:00\n\n  Crystal Palace\n          \n 0 - 1\n\n  Arsenal\n          \nPremier League          \n\n\nSat Aug 26 - 15:00\n\n  Arsenal\n          \n 2 - 2\n\n  Fulham\n          \nPremier League          \n\n\n'
-        # first text after \n\n is the month and year, if the month is before the current month, pop it out
-        matchMonth = match.text.split("\n\n")[1].strip()
-        matchMonth = datetime.strptime(matchMonth, "%B %Y")
-        currentDate = datetime.utcnow()
-        if matchMonth.year <= currentDate.year and matchMonth.month < currentDate.month:
-            continue
-        # the rest can be split by \n\n\n
-        matchArray = match.text.split("\n\n\n")
-        matchYear = matchArray[0].split("\n\n")[1].strip()
-        # remove anything in the string that is not a number
-        matchYear = "".join(filter(str.isdigit, matchYear))
-        matchYear = datetime.strptime(matchYear, "%Y")
-        matchArray.pop(0)  # pops the first element which is the month and year
-        matchArray.pop(-1)  # pops the last element which is an empty string
-        for arr in matchArray:
-            # check if the match is in the past, if it is, skip it
-            # example arr: Wed Aug 2 - 18:00\n\n  Arsenal\n          \n 1 - 1\n\n  Monaco\n          \nEmirates Cup
-            if "(Date and time TBC)" in arr:
-                arr = arr.replace(
-                    "(Date and time TBC)          ", "\n"
-                )  # women's fixtures and results have this for some reason, replacing it with newline
-            if "Time TBC" in arr:
-                arr = arr.replace(
-                    "Time TBC          ", "15:00 \n"
-                )  # some mens fixtures have this, replacing it with midnight until we get the time
-            matchDate = arr.split("\n\n")[0].strip()
-            try:
-                matchDate = datetime.strptime(matchDate, "%a %b %d - %H:%M")
-            except ValueError:
-                # if a time hasnt been set, we should just skip it for now
-                continue
-            # change matchDate.year to matchYear.year
-            matchDate = matchDate.replace(year=matchYear.year)
-            # check if the match is in the past, if it is, skip it
-            if matchDate < currentDate:
-                continue
-            matchObj = parseMatchArray(arr)
-            fixtures += [matchObj]
-            if len(fixtures) >= number:
-                return fixtures
+    for match in matches[next_match_int:]:
+        date = parse_date(match)
+        (opponent, location) = parse_opponent(match)
+        competition_parsed = match.find(
+            "div", class_="printable_printable_hero_box_type__JkjSv"
+        )
+        if competition_parsed:
+            competition = competition_parsed.text
+        fixtures += [
+            Fixture(
+                date=date, opponent=opponent, location=location, competition=competition
+            )
+        ]
+        if len(fixtures) >= number:
+            return fixtures
     return fixtures
 
 
-def parseMatchArray(matchArray):
-    """converts the str of matches into a Match Object"""
-    matchObj = Match("", "", "", "")
-    # example match string:'Wed Nov 1 - 19:30\n\n  West Ham United\n          \n 3 - 1\n\n  Arsenal\n          \nCarabao Cup          '
-    # split by \n\n
-    matchStr = matchArray.split("\n\n")
-    # first element is the date and time starting with the day of the week, month, date, time
-    # second element is the home team
-    # third element is the score
-    # fourth element is the away team
-    # fifth element is the competition
-    matchObj.date = matchStr[0].split(" - ")[0].strip()
-    matchObj.time = matchStr[0].split(" - ")[1].strip()
-    matchStr = matchStr[1].split("\n")
-    homeTeam = matchStr[0].strip()
-    awayTeam = matchStr[4].strip()
-    matchObj.comp = matchStr[6].strip()
-    matchObj.team = getOpponent(homeTeam, awayTeam)
-    return matchObj
-
-
-def parseResultArray(resultArray):
-    """converts the str of matches into a Result Object"""
-    resultObj = Result("", "", "", "", "", "")
-    resultStr = resultArray.split("\n\n")
-    resultObj.date = resultStr[0].split(" - ")[0].strip()
-    resultObj.time = resultStr[0].split(" - ")[1].strip()
-    homeTeam = resultStr[1].split("\n")[0].strip()
-    score = resultStr[1].split("\n")[2].strip()
-    awayTeam = resultStr[-1].split("\n")[0].strip()
-    resultObj.comp = resultStr[2].split("\n")[2].strip()
-    resultObj.team = getOpponent(homeTeam, awayTeam)
-    resultObj.score = score
-    resultObj.wonOrLost = getWonOrLost(homeTeam, awayTeam, score)
-    return resultObj
-
-
-def getWonOrLost(homeTeam, awayTeam, score):
-    """determines if Arsenal won or lost the match"""
-    homeScore = int(score.split(" - ")[0].strip())
-    awayScore = int(score.split(" - ")[1].strip())
-    if homeTeam == "Arsenal":
-        if homeScore > awayScore:
+def get_won_or_lost(scoreline, location):
+    """Determine if Arsenal won, lost or drew the result"""
+    home_score, away_score = map(int, scoreline.split(" - "))
+    if location == "Home":
+        if home_score > away_score:
             return "W"
-        elif homeScore < awayScore:
+        elif home_score < away_score:
             return "L"
-        else:
-            return "D"
     else:
-        if homeScore > awayScore:
+        if home_score > away_score:
             return "L"
-        elif homeScore < awayScore:
+        elif home_score < away_score:
             return "W"
-        else:
-            return "D"
-
-
-def getOpponent(homeTeam, awayTeam):
-    """returns the opponent of the match"""
-    if homeTeam == "Arsenal":
-        return f"{awayTeam} (H)"
-    else:
-        return f"{homeTeam} (A)"
+    return "D"
 
 
 def getInternationalCup(
