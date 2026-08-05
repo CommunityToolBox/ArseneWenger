@@ -296,6 +296,25 @@ def find_results(matches: ResultSet[Tag], number: int = 3) -> list[Fixture]:
     return results
 
 
+def clean_date_string(date_str: str) -> str:
+    """Cleans up months abbreviated in ways we don't expect
+
+    Args:
+        String representing a date following the Weekday Month Day - HH:MM format
+
+    Returns:
+        The same string but with properly abbreviated month.
+    """
+    # Stupid UK abbreviations
+    month_map = {"sept": "Sep"}
+
+    def replace_month(match):
+        word = match.group(0)
+        return month_map.get(word.lower(), word)
+
+    return re.sub(r"[A-Za-z]+", replace_month, date_str)
+
+
 def parse_date(match):
     """Return a datetime for the given match
 
@@ -307,6 +326,7 @@ def parse_date(match):
     date_string = match.find(
         "div", class_=re.compile("printable_printable_hero_box_date.*")
     ).text
+    date_string = clean_date_string(date_string)
     parsed = datetime.datetime.strptime(date_string, "%a %b %d - %H:%M").replace(
         tzinfo=datetime.UTC
     )
@@ -451,7 +471,7 @@ async def setup(bot):
 
 def main():
     fixtures = parse_arsenal()
-    find_fixtures(fixtures, 3)
+    find_fixtures(fixtures, 10)
 
 
 if __name__ == "__main__":
