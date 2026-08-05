@@ -28,7 +28,7 @@ class Fixture(BaseModel):
     location: Literal["Home", "Away"]
     competition: str
     scoreline: str = ""
-    result: Literal["W", "L", "D"]
+    result: Literal["W", "L", "D"] | None = None
 
 
 class FixturesCog(commands.Cog):
@@ -447,3 +447,12 @@ async def setup(bot):
     same file all need adding and each file must have their own setup function.
     """
     await bot.add_cog(FixturesCog(bot))
+
+
+def main():
+    fixtures = parse_arsenal()
+    find_fixtures(fixtures, 3)
+
+
+if __name__ == "__main__":
+    main()
