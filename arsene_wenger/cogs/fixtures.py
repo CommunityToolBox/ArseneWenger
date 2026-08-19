@@ -60,8 +60,9 @@ class FixturesCog(commands.Cog):
 
         for fixture in fixture_list:
             discord_aware_stamp = make_discord_timestamp(fixture.date)
+            location_tag = "(H)" if fixture.location == "Home" else "(A)"
             embed.add_field(
-                name=f"{fixture.opponent} - {fixture.competition}",
+                name=f"{location_tag} {fixture.opponent}    - {fixture.competition}",
                 value=f"{discord_aware_stamp}",
                 inline=False,
             )
@@ -162,8 +163,9 @@ class FixturesCog(commands.Cog):
             else:
                 icon = "⬜"
 
+            location_tag = "(H)" if result.location == "Home" else "(L)"
             embed.add_field(
-                name=f"{icon} against {result.opponent} - {result.competition}",
+                name=f"{icon}  {location_tag}  against {result.opponent} - {result.competition}",
                 value=f"{result.date} | {result.scoreline} | ",
                 inline=False,
             )
