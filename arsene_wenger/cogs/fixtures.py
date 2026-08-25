@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup, ResultSet, Tag
 from discord import app_commands
 from discord.ext import commands
 from fotmob import fotmob
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
 if __name__ != "__main__":
     from utils import clamp_int, make_discord_timestamp
@@ -29,6 +29,10 @@ class Fixture(BaseModel):
     competition: str
     scoreline: str = ""
     result: Literal["W", "L", "D"] | None = None
+    @computed_field
+    @property
+    def location_tag(self) -> str:
+        return "(H)" if self.location == "Home" else "(A)"
 
 
 class FixturesCog(commands.Cog):
@@ -60,9 +64,8 @@ class FixturesCog(commands.Cog):
 
         for fixture in fixture_list:
             discord_aware_stamp = make_discord_timestamp(fixture.date)
-            location_tag = "(H)" if fixture.location == "Home" else "(A)"
             embed.add_field(
-                name=f"{location_tag} {fixture.opponent}    - {fixture.competition}",
+                name=f"{fixture.opponent} {fixture.location_tag}  - {fixture.competition}",
                 value=f"{discord_aware_stamp}",
                 inline=False,
             )
@@ -97,9 +100,9 @@ class FixturesCog(commands.Cog):
         delta = fixture.date - date
         discord_timestamp = make_discord_timestamp(fixture.date)
         if delta.days > 0:
-            response = f"Next match is {fixture.opponent} in {delta.days} days, {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
+            response = f"Next match is {fixture.opponent} {fixture.location_tag} in {delta.days} days, {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
         elif delta.days == 0:
-            response = f"Next match is {fixture.opponent} in {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
+            response = f"Next match is {fixture.opponent} {fixture.location_tag} in {delta.seconds // 3600} hours, {(delta.seconds // 60) % 60} minutes on {discord_timestamp}"
         else:
             channel = discord.utils.get(
                 interaction.guild.text_channels, name="live-games"
@@ -163,9 +166,8 @@ class FixturesCog(commands.Cog):
             else:
                 icon = "⬜"
 
-            location_tag = "(H)" if result.location == "Home" else "(L)"
             embed.add_field(
-                name=f"{icon}  {location_tag}  against {result.opponent} - {result.competition}",
+                name=f"{icon} against {result.opponent} {result.location_tag} - {result.competition}",
                 value=f"{result.date} | {result.scoreline} | ",
                 inline=False,
             )
