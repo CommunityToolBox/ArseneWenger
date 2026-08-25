@@ -65,7 +65,7 @@ class FixturesCog(commands.Cog):
         for fixture in fixture_list:
             discord_aware_stamp = make_discord_timestamp(fixture.date)
             embed.add_field(
-                name=f"{fixture.opponent} {fixture.location_tag}  - {fixture.competition}",
+                name=f"{fixture.opponent} {fixture.location_tag} - {fixture.competition}",
                 value=f"{discord_aware_stamp}",
                 inline=False,
             )
