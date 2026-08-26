@@ -2,6 +2,7 @@
 A cog to give interesting player facts
 """
 
+import asyncio
 import re
 
 import discord
@@ -124,7 +125,7 @@ class PlayerStatsCog(commands.Cog):
 
         team_id = self.CLUB_ID_TRANSLATIONS[team.lower()][0]
         try:
-            goals = getGoalsScored(team_id)
+            goals = await asyncio.to_thread(getGoalsScored, team_id)
         except AttributeError:
             goals = f"could not find goals for {team}"
 
@@ -147,7 +148,7 @@ class PlayerStatsCog(commands.Cog):
             )
 
         competition_name = self.COMPETITION_TRANSLATIONS[competition.lower()]
-        assists = getAssists(competition_name)
+        assists = await asyncio.to_thread(getAssists, competition_name)
         embed = discord.Embed(color=0x9C824A, description=f"```{assists}```")
         embed.set_author(
             name="Top assists for Arsenal",
@@ -165,8 +166,10 @@ class PlayerStatsCog(commands.Cog):
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.75 Safari/537.36",
             "X-Requested-With": "XMLHttpRequest",
         }
-        response = requests.get(injuries_url, headers=headers).text
-        parsed_page = BeautifulSoup(response, features="lxml")
+        response = await asyncio.to_thread(
+            requests.get, injuries_url, headers=headers, timeout=15
+        )
+        parsed_page = BeautifulSoup(response.text, features="lxml")
         team_table = parsed_page.find_all("tr", attrs={"class": "player-row team_1"})
         injured_players = [i.text for i in team_table]
 
@@ -205,7 +208,7 @@ def getPlayerStats(club_id):
     metrics_wanted = {
         "goals"
     }  # Can be expanded to other metrics like assists, minutes played etc
-    page = requests.get(f"https://fbref.com/en/squads/{club_id}")
+    page = requests.get(f"https://fbref.com/en/squads/{club_id}", timeout=15)
     comm = re.compile("<!--|-->")
     soup = BeautifulSoup(comm.sub("", page.text), "lxml")
     all_tables = soup.findAll("tbody")
@@ -249,7 +252,7 @@ def getGoalsScored(club):
 
 def getAssists(comp):
     table_url = f"https://fbref.com/en/squads/18bb7c10/{current_season()}/all_comps/Arsenal-Stats-All-Competitions"
-    x1 = requests.get(table_url, stream=True)
+    x1 = requests.get(table_url, stream=True, timeout=15)
     x2 = ""
     ind = False
     for lines in x1.iter_lines():

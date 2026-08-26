@@ -1,4 +1,5 @@
 # !/usr/bin/python
+import asyncio
 import re
 
 import discord
@@ -19,7 +20,7 @@ class Tables(commands.Cog):
         name="table", description="Display the current Premier League Table."
     )
     async def leagueTable(self, interaction: discord.Interaction, background: str = ""):
-        body = livetable()
+        body = await asyncio.to_thread(livetable)
 
         # Check if (w)hite or (l)ight, else use dark mode
         light_mode = background.startswith(("l", "w"))
@@ -44,7 +45,7 @@ class Tables(commands.Cog):
 
     @commands.command(name="Europa", help="Display the Europa League Table.")
     async def europaTable(self, ctx):
-        body = main()
+        body = await asyncio.to_thread(main)
         await ctx.send("```" + body + "```")
 
 
@@ -193,7 +194,7 @@ def shortenedClubNames(club):
 
 def livetable():
     tableurl = "https://www.premierleague.com/tables"
-    x1 = requests.get(tableurl, stream=True)
+    x1 = requests.get(tableurl, stream=True, timeout=15)
     x2 = ""
     for lines in x1.iter_lines():
         lines_d = lines.decode("utf-8")

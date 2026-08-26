@@ -2,6 +2,7 @@
 A cog to get transfers
 """
 
+import asyncio
 import datetime
 
 import requests
@@ -20,8 +21,9 @@ class TransfersCogs(commands.Cog):
     )
     async def signings(self, ctx):
         players = ""
-        if "None" not in getSignings():
-            for name in getSignings():
+        signings = await asyncio.to_thread(getSignings)
+        if "None" not in signings:
+            for name in signings:
                 players += name + "\n"
         else:
             players = "Fuck All"
@@ -49,7 +51,7 @@ def getSignings():
         + "&pos=&detailpos=&w_s="
         + season
     )
-    website = requests.get(address, headers={"User-Agent": "Custom"})
+    website = requests.get(address, headers={"User-Agent": "Custom"}, timeout=15)
     soup = BeautifulSoup(website.text, "lxml")
     soup = soup.findAll("div", {"class": "box"})[2]
     table = soup.find("div", {"class": "responsive-table"})
