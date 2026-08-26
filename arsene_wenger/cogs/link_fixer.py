@@ -27,13 +27,13 @@ class LinkFixerCog(commands.Cog):
         pattern = re.compile(rf"https?://(?:www\.)?(?:{domain})/\S+")
         return re.findall(pattern, message)
 
-    def twitter_web_viewer_url(self, message):
+    def twitter_web_viewer_url(self, url):
         """Extra url for twitter and x links that takes the original URL's number and converts it to
             a twitter web viewer url. 
             example: if new_url is "https://www.fxtwitter.com/samimokbel_bbc/status/2092649709462564884?s=46"
             the function should return "https://twitterwebviewer.com/?tweet=2092649709462564884"
         """
-        match = re.search(r"status/(\d+)", message)
+        match = re.search(r"status/(\d+)", url)
         if match:
             tweet_id = match.group(1)
             return f"https://twitterwebviewer.com/?tweet={tweet_id}"
@@ -60,13 +60,16 @@ class LinkFixerCog(commands.Cog):
                     twitter_web_viewer = self.twitter_web_viewer_url(new_url)
                     if twitter_web_viewer:
                         await message.reply(
-                            f"Fx'ed that for you! {new_url}", mention_author=False
+                            f"Fx'ed that for you! {new_url}\nTwitter Web Viewer version: <{twitter_web_viewer}>", mention_author=False
                         )
-                        await message.reply(f"Twitter Web Viewer version: {twitter_web_viewer}", suppress_embeds=True, mention_author=False)
                     else:
                         await message.reply(
-                        f"Fx'ed that for you! {new_url}", mention_author=False
+                            f"Fx'ed that for you! {new_url}", mention_author=False
                         )
+                else:
+                    await message.reply(
+                    f"Fx'ed that for you! {new_url}", mention_author=False
+                    )
 
 
 async def setup(bot):
