@@ -2,7 +2,9 @@
 A cog to spit back random lines from files
 """
 
+import asyncio
 import random
+from pathlib import Path
 
 import discord
 from discord import app_commands
@@ -21,9 +23,12 @@ class FactsCog(commands.Cog):
 
     @commands.command(name="wengersucks")
     async def wengerSucks(self, ctx):
-        with open("wengerSucks.txt", "r", encoding="utf-8") as f:
-            content = f.read()
+        def _read():
+            path = Path(__file__).parent.parent / "wengerSucks.txt"
+            with open(path, "r", encoding="utf-8") as f:
+                return f.read()
 
+        content = await asyncio.to_thread(_read)
         for message in content.split("\n\n"):
             return await ctx.send(message)
 
@@ -33,7 +38,7 @@ class FactsCog(commands.Cog):
     )
     async def wengerFact(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            embed=await self.getManagerFact("wenger")
+            embed=self.getManagerFact("wenger")
         )
 
     @app_commands.command(
@@ -41,7 +46,7 @@ class FactsCog(commands.Cog):
         description="Get a random fact about our former manager Unai Emery.",
     )
     async def unaiFact(self, interaction: discord.Interaction):
-        await interaction.response.send_message(embed=await self.getManagerFact("unai"))
+        await interaction.response.send_message(embed=self.getManagerFact("unai"))
 
     @app_commands.command(
         name="artetafact",
@@ -49,16 +54,16 @@ class FactsCog(commands.Cog):
     )
     async def artetaFact(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            embed=await self.getManagerFact("arteta")
+            embed=self.getManagerFact("arteta")
         )
 
-    async def getManagerFact(self, manager):
+    def getManagerFact(self, manager):
         """
         Get a random fact and return it as a nice embed
         :param manager:
         :return:
         """
-        facts = f"facts/{manager}Facts.txt"
+        facts = Path(__file__).parent.parent / "facts" / f"{manager}Facts.txt"
         try:
             with open(facts, "r", encoding="utf-8") as f:
                 content = f.readlines()
@@ -73,6 +78,7 @@ class FactsCog(commands.Cog):
             return embed
         except FileNotFoundError:
             print(f"{getTimestamp()}\nError reading file {facts}")
+            return None
 
 
 async def setup(bot):

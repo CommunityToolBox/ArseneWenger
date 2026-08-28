@@ -29,6 +29,7 @@ class Fixture(BaseModel):
     competition: str
     scoreline: str = ""
     result: Literal["W", "L", "D"] | None = None
+
     @computed_field
     @property
     def location_tag(self) -> str:
