@@ -2,6 +2,7 @@
 A cog with useful commands around fixtures
 """
 
+import asyncio
 import datetime
 import logging
 import re
@@ -51,7 +52,7 @@ class FixturesCog(commands.Cog):
             count: number of fixtures to use
         """
         count = clamp_int(count, 1, 20)
-        fixtures = parse_arsenal(team_type)
+        fixtures = await asyncio.to_thread(parse_arsenal, team_type)
         fixture_list = find_fixtures(fixtures, count)
 
         embed = discord.Embed(color=0x9C824A)
@@ -93,7 +94,7 @@ class FixturesCog(commands.Cog):
         self, interaction: discord.Interaction, team_type: str
     ):
         """generates the embed for the next and wnext commands"""
-        fixtures = parse_arsenal(team_type)
+        fixtures = await asyncio.to_thread(parse_arsenal, team_type)
         fixture = find_fixtures(fixtures, 1)[0]
         date = datetime.datetime.now(tz=datetime.UTC)
 
@@ -147,7 +148,7 @@ class FixturesCog(commands.Cog):
         self, interaction: discord.Interaction, team_type: str, count: int = 3
     ):
         count = clamp_int(count, 1, 10)
-        fixtures = parse_arsenal(team_type)
+        fixtures = await asyncio.to_thread(parse_arsenal, team_type)
         result_list = find_results(fixtures, count)
 
         embed = discord.Embed(color=0x9C824A)
@@ -186,20 +187,20 @@ class FixturesCog(commands.Cog):
 
     @commands.command(name="euro", aliases=("euros",), help="Show recent results")
     async def euro(self, ctx):
-        body = getInternationalCup()
+        body = await asyncio.to_thread(getInternationalCup)
         await ctx.send(f"```{body}```")
 
     @commands.command(name="copa", aliases=("copas",), help="Show results")
     async def copa(self, ctx):
-        body = getInternationalCup(44, 20210710)
+        body = await asyncio.to_thread(getInternationalCup, 44, 20210710)
         await ctx.send(f"```{body}```")
 
     @commands.command(name="olympic", aliases=("olympics",), help="Show results")
     async def olympic(self, ctx):
-        body = getInternationalCup(66, 20210810)
+        body = await asyncio.to_thread(getInternationalCup, 66, 20210810)
         body = "Men:\n" + body
         await ctx.send(f"```{body}```")
-        body = getInternationalCup(65, 20210810)
+        body = await asyncio.to_thread(getInternationalCup, 65, 20210810)
         body = "Women:\n" + body
         await ctx.send(f"```{body}```")
 
