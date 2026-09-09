@@ -335,8 +335,9 @@ def parse_date(match):
     parsed = datetime.datetime.strptime(date_string, "%a %b %d - %H:%M").replace(
         tzinfo=datetime.UTC
     )
-    current_year = datetime.datetime.now(tz=datetime.UTC).year
-    target_year = current_year if parsed.month >= 7 else current_year + 1
+    now = datetime.datetime.now(tz=datetime.UTC)
+    season_start_year = now.year if now.month >= 7 else now.year - 1
+    target_year = season_start_year if parsed.month >= 7 else season_start_year + 1
     date = parsed.replace(year=target_year)
     return date
 
