@@ -32,14 +32,10 @@ def clamp_int(value, minimum, maximum):
 def current_season() -> str:
     """
     Returns a season string i.e. 2022-2023, 2023-2024
-
-    We check whether we are in a season typically between August and May
     """
     now = datetime.datetime.now(tz=datetime.UTC)
-    if now.month >= 8 or now.month <= 5:
-        return f"{now.year}-{now.year + 1}"
-    else:
-        return f"{now.year - 1}-{now.year}"
+    start = now.year if now.month >= 7 else now.year - 1
+    return f"{start}-{start + 1}"
 
 
 def make_discord_timestamp(value: datetime.datetime) -> str:
