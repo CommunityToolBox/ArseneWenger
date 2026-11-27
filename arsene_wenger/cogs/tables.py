@@ -1,276 +1,262 @@
-# !/usr/bin/python
-import asyncio
-import re
+from datetime import date
 
+import aiohttp
 import discord
-import pandas as pd
-import requests
-import requests.auth
-import tabulate
 from discord import app_commands
 from discord.ext import commands
-from PIL import Image, ImageDraw, ImageFont
+
+
+def get_current_season_year(today: date | None = None) -> int:
+    today = today or date.today()
+    return today.year if today.month >= 8 else today.year - 1
+
+
+def get_position_movement(overall: dict) -> int:
+    position = overall.get("position")
+    starting_position = overall.get("startingPosition")
+    if not isinstance(position, int) or not isinstance(starting_position, int):
+        return 0
+    return starting_position - position
+
+
+def format_position_change(overall: dict) -> str:
+    movement = get_position_movement(overall)
+    if movement > 0:
+        return f"🟢 ▲{movement}"
+    if movement < 0:
+        return f"🔴 ▼{abs(movement)}"
+    return "⚪ —"
+
+
+def format_ansi_position_change(overall: dict) -> str:
+    movement = get_position_movement(overall)
+    if movement > 0:
+        color, indicator = 32, f"▲{movement}"
+    elif movement < 0:
+        color, indicator = 31, f"▼{abs(movement)}"
+    else:
+        color, indicator = 37, "—"
+    return f"\x1b[{color}m{indicator:>4}\x1b[0m"
 
 
 class Tables(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @app_commands.command(
-        name="table", description="Display the current Premier League Table."
-    )
-    async def leagueTable(self, interaction: discord.Interaction, background: str = ""):
-        body = await asyncio.to_thread(livetable)
-
-        # Check if (w)hite or (l)ight, else use dark mode
-        light_mode = background.startswith(("l", "w"))
-
-        if light_mode:
-            return await interaction.response.send_message(
-                "Light mode is not allowed, you spud."
-            )
-
-        bg_colour = (47, 49, 54)
-        font_colour = (255, 255, 255)
-
-        img = Image.new("RGB", (1130, 840), bg_colour)
-        d = ImageDraw.Draw(img)
-        font = ImageFont.truetype("AnonymousPro.ttf", 36)
-        d.text((5, 10), body, font_colour, font=font)
-        img.save("tempImg.jpg")
-
-        await interaction.response.send_message(
-            "EPL Standings", file=discord.File("tempImg.jpg")
+    async def fetch_table(self, matchweek: int | None = None):
+        base_url = (
+            "https://sdp-prem-prod.premier-league-prod.pulselive.com"
+            f"/api/v5/competitions/8/seasons/{get_current_season_year()}"
         )
 
-    @commands.command(name="Europa", help="Display the Europa League Table.")
-    async def europaTable(self, ctx):
-        body = await asyncio.to_thread(main)
-        await ctx.send("```" + body + "```")
-
-
-# Utility Functions for tables
-
-
-def getSign(goalDiff):
-    if int(goalDiff) > 0:
-        return "+" + goalDiff
-    return goalDiff
-
-
-# Premier League Table
-
-
-def discordAbove(table, index, i):
-    body = ""
-    if index < 0:
-        return body
-    elif index == 0:
-        team = re.findall(r'a href=".*">(.*)<\/a>', table[1])[0]
-        position = re.findall('<td class="pos">(.*)</td>', table[1])[0]
-        goalDiff = re.findall('<td class="gd">(.*)</td>', table[1])[0]
-        points = re.findall('<td class="pts">(.*)</td>', table[1])[0]
-        body += (
-            "| "
-            + position
-            + " |"
-            + team
-            + "|"
-            + getSign(goalDiff)
-            + "|"
-            + points
-            + "|\n"
-        )
-    else:
-        for x in range(index, i):
-            team = re.findall(r'a href=".*">(.*)<\/a>', table[x])[0]
-            position = re.findall('<td class="pos">(.*)</td>', table[x])[0]
-            goalDiff = re.findall('<td class="gd">(.*)</td>', table[x])[0]
-            points = re.findall('<td class="pts">(.*)</td>', table[x])[0]
-            body += (
-                "| "
-                + position
-                + " |"
-                + team
-                + "|"
-                + getSign(goalDiff)
-                + "|"
-                + points
-                + "|\n"
-            )
-    return body
-
-
-def discordBelow(table, index, i):
-    body = ""
-    index = max(index, 5)
-    for x in range(i + 1, index + 1):
-        team = re.findall(r'a href=".*">(.*)<\/a>', table[x])[0]
-        position = re.findall('<td class="pos">(.*)</td>', table[x])[0]
-        goalDiff = re.findall('<td class="gd">(.*)</td>', table[x])[0]
-        points = re.findall('<td class="pts">(.*)</td>', table[x])[0]
-        body += (
-            "| "
-            + position
-            + " |"
-            + team
-            + "|"
-            + getSign(goalDiff)
-            + "|"
-            + points
-            + "|\n"
-        )
-    return body
-
-
-def findArsenal(table):
-    header = "| Pos |  Team  | GD | Pts |\n"
-    for index, pos in enumerate(table):
-        team = re.findall(r'a href=".*">(.*)<\/a>', pos)[0]
-        if team == "Arsenal":
-            i = index
-            position = re.findall('<td class="pos">(.*)</td>', pos)[0]
-            goalDiff = re.findall('<td class="gd">(.*)</td>', pos)[0]
-            points = re.findall('<td class="pts">(.*)</td>', pos)[0]
-            body = (
-                "| "
-                + position
-                + " |"
-                + team.upper()
-                + "|"
-                + getSign(goalDiff)
-                + "|"
-                + points
-                + "|\n"
-            )
-    topRange = i + 2
-    botRange = i - 2
-    if botRange <= 1:
-        topRange += 1
-    above = discordAbove(table, botRange, i)
-    below = discordBelow(table, topRange, i)
-    body = header + above + body + below
-    return body
-
-
-def parseWebsite():
-    website = "https://www.espn.com/soccer/standings/_/league/eng.1"
-    tableWebsite = requests.get(website, timeout=15)
-    table_html = tableWebsite.text
-    fullTable = table_html.split('<div class="responsive-table">')
-    table = fullTable.split('<tr style="background-color:')
-    # fixtures[0] now holds the next match
-    return table
-
-
-def shortenedClubNames(club):
-    clublist = {
-        "Chelsea": "Chelsea",
-        "Manchester City": "Man City",
-        "Brighton and Hove Albion": "Brighton",
-        "Tottenham Hotspur": "Spurs",
-        "Manchester United": "Man Utd",
-        "West Ham United": "West Ham",
-        "Everton": "Everton",
-        "Wolverhampton Wanderers": "Wolves",
-        "Leicester City": "Leicester",
-        "Arsenal": "Arsenal",
-        "Aston Villa": "Villa",
-        "Crystal Palace": "Palace",
-        "Southampton": "Southampton",
-        "Watford": "Watford",
-        "Leeds United": "Leeds",
-        "Burnley": "Burnley",
-        "Newcastle United": "Newcastle",
-        "Norwich City": "Norwich",
-        "Brentford": "Brentford",
-        "Liverpool": "L'pool",
-        "Fulham": "Fulham",
-        "Nottingham Forest": "Forest",
-        "Bournemouth": "Bournemouth",
-    }
-    return clublist.get(club, club)
-
-
-def livetable():
-    tableurl = "https://www.premierleague.com/tables"
-    x1 = requests.get(tableurl, stream=True, timeout=15)
-    x2 = ""
-    for lines in x1.iter_lines():
-        lines_d = lines.decode("utf-8")
-        x2 = x2 + lines_d
-        if "tableCompetitionExplainedContainer" in lines_d:
-            break
-    tableslist = pd.read_html(x2)[0]
-    rows = tableslist.to_numpy().tolist()
-    i = 0
-    data = [["#", "Team", "Pl", "W", "D", "L", "GD", "Pts"]]
-    while i < len(rows):
-        tablerow = rows[i]
-        risefall = [tablerow[0].split(" ", 1)[0], tablerow[0].rsplit(" ", 1)[1]]
-        if int(risefall[0]) < int(risefall[1]):
-            risefallind = "^ "
-        elif int(risefall[0]) > int(risefall[1]):
-            risefallind = "v "
+        if matchweek is None:
+            url = f"{base_url}/standings"
         else:
-            risefallind = "- "
-        pos = risefall[0]
-        fullteamname = tablerow[1].rsplit(" ", 1)[0].strip()
-        team = shortenedClubNames(fullteamname)
-        if team == "Arsenal":
-            pos = "-> " + pos
-        pl = tablerow[2]
-        w = tablerow[3]
-        d = tablerow[4]
-        l = tablerow[5]
-        gd = tablerow[8]
-        pts = tablerow[9]
-        team = risefallind + team
-        data.append([pos, team, pl, w, d, l, gd, pts])
-        i = i + 2
+            url = f"{base_url}/matchweeks/{matchweek}/standings"
 
-    tabulate.PRESERVE_WHITESPACE = False
-    table = tabulate.tabulate(
-        data,
-        headers="firstrow",
-        tablefmt="pretty",
-        colalign=(
-            "right",
-            "left",
-        ),
-    )
-    return table
+        timeout = aiohttp.ClientTimeout(total=5)
 
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(
+                url,
+                headers={
+                    "Origin": "https://www.premierleague.com",
+                    "Referer": "https://www.premierleague.com/",
+                },
+                timeout=timeout,
+            ) as resp:
+                resp.raise_for_status()
+                return await resp.json()
 
-# EUROPA LEAGUE
+    async def get_table_data(
+        self,
+        interaction: discord.Interaction,
+        matchweek: int | None,
+        previous: bool,
+    ) -> dict | None:
+        await interaction.response.defer()
 
+        if previous and matchweek is not None:
+            await interaction.followup.send(
+                "Choose either a previous matchweek or a specific matchweek, not both."
+            )
+            return None
 
-def buildTable(table):
-    body = ""
-    for i in range(4):
-        team = re.findall(r'a href=".*">(.*)<\/a>', table[i])[0]
-        position = re.findall('<td class="pos">(.*)</td>', table[i])[0]
-        goalDiff = re.findall('<td class="gd">(.*)</td>', table[i])[0]
-        points = re.findall('<td class="pts">(.*)</td>', table[i])[0]
-        if team == "Arsenal":
-            team = team.upper()
-        body += (
-            "|" + position + "|" + team + "|" + getSign(goalDiff) + "|" + points + "|\n"
+        try:
+            if previous:
+                current = await self.fetch_table()
+                matchweek = current["matchweek"] - 1
+
+                if matchweek < 1:
+                    await interaction.followup.send(
+                        "There isn't a previous matchweek yet."
+                    )
+                    return None
+
+            data = await self.fetch_table(matchweek)
+
+            if matchweek is not None and data.get("matchweek") != matchweek:
+                await interaction.followup.send(
+                    f"Standings for matchweek {matchweek} aren't available."
+                )
+                return None
+
+            return data
+
+        except aiohttp.ClientResponseError as exc:
+            if exc.status == 404 and matchweek is not None:
+                await interaction.followup.send(
+                    f"Standings for matchweek {matchweek} aren't available."
+                )
+            else:
+                await interaction.followup.send(
+                    "Couldn't fetch the standings. Please try again later."
+                )
+
+        except (aiohttp.ClientError, TimeoutError, ValueError):
+            await interaction.followup.send(
+                "Couldn't fetch the standings. Please try again later."
+            )
+
+        return None
+
+    def _simple_table_embed(self, data: dict) -> discord.Embed:
+        entries = sorted(
+            data["tables"][0]["entries"],
+            key=lambda entry: entry["overall"]["position"],
         )
-    return body
 
+        groups = {"Top 10": [], "Mid Table": [], "Relegation Zone": []}
 
-def main():
-    table = parseWebsite()
-    body = buildTable(table)
-    return body
+        for entry in entries:
+            stats = entry["overall"]
+            position = stats["position"]
+            line = (
+                f"{format_position_change(stats)} {position}. "
+                f"{entry['team']['name']} – {stats['points']} pts"
+            )
+
+            if position <= 10:
+                groups["Top 10"].append(line)
+            elif position <= 17:
+                groups["Mid Table"].append(line)
+            else:
+                groups["Relegation Zone"].append(line)
+
+        embed = discord.Embed(
+            title=f"{data['competition']['name']} {data['season']['name']}",
+            description=f"Matchweek {data['matchweek']} Table",
+            color=discord.Color.orange(),
+        )
+
+        for group_name, lines in groups.items():
+            if lines:
+                embed.add_field(name=group_name, value="\n".join(lines), inline=False)
+
+        return embed
+
+    def _detailed_table_embed(self, data: dict) -> discord.Embed:
+        entries = sorted(
+            data["tables"][0]["entries"],
+            key=lambda entry: entry["overall"]["position"],
+        )
+        groups = {"Top 10": [], "Mid Table": [], "Relegation Zone": []}
+        header = (
+            f"{'#':>2} {'Move':>4} {'Team':<14} {'P':>2} {'W':>2} {'D':>2} "
+            f"{'L':>2} {'GF':>3} {'GA':>3} {'GD':>4} {'Pts':>3}"
+        )
+
+        for entry in entries:
+            team = entry["team"]
+            stats = entry["overall"]
+            name = team.get("shortName") or team["name"]
+            position = stats["position"]
+            goal_difference = stats["goalsFor"] - stats["goalsAgainst"]
+
+            line = (
+                f"{position:>2} {format_ansi_position_change(stats)} {name:<14.14} "
+                f"{stats['played']:>2} "
+                f"{stats['won']:>2} "
+                f"{stats['drawn']:>2} "
+                f"{stats['lost']:>2} "
+                f"{stats['goalsFor']:>3} "
+                f"{stats['goalsAgainst']:>3} "
+                f"{goal_difference:>+4} "
+                f"{stats['points']:>3}"
+            )
+
+            if position <= 10:
+                groups["Top 10"].append(line)
+            elif position <= 17:
+                groups["Mid Table"].append(line)
+            else:
+                groups["Relegation Zone"].append(line)
+
+        embed = discord.Embed(
+            title=f"{data['competition']['name']} {data['season']['name']}",
+            description=f"Matchweek {data['matchweek']} Table",
+            color=discord.Color.orange(),
+        )
+
+        for group_name, lines in groups.items():
+            if lines:
+                table = "\n".join([header, *lines])
+                embed.add_field(
+                    name=group_name,
+                    value=f"```ansi\n{table}\n```",
+                    inline=False,
+                )
+        return embed
+
+    async def _send_table(
+        self,
+        interaction: discord.Interaction,
+        detailed: bool,
+        matchweek: int | None,
+        previous: bool,
+    ):
+        data = await self.get_table_data(interaction, matchweek, previous)
+        if data is None:
+            return
+
+        embed = (
+            self._detailed_table_embed(data)
+            if detailed
+            else self._simple_table_embed(data)
+        )
+        await interaction.followup.send(embed=embed)
+
+    @app_commands.command(
+        name="table", description="Show the simple Premier League table."
+    )
+    @app_commands.describe(
+        matchweek="Show standings for a specific matchweek",
+        previous="Show the previous matchweek's standings",
+    )
+    async def pl_table(
+        self,
+        interaction: discord.Interaction,
+        matchweek: app_commands.Range[int, 1, 38] | None = None,
+        previous: bool = False,
+    ):
+        await self._send_table(interaction, False, matchweek, previous)
+
+    @app_commands.command(
+        name="table-detailed",
+        description="Show the detailed Premier League table.",
+    )
+    @app_commands.describe(
+        matchweek="Show standings for a specific matchweek",
+        previous="Show the previous matchweek's standings",
+    )
+    async def pl_table_detailed(
+        self,
+        interaction: discord.Interaction,
+        matchweek: app_commands.Range[int, 1, 38] | None = None,
+        previous: bool = False,
+    ):
+        await self._send_table(interaction, True, matchweek, previous)
 
 
 async def setup(bot):
-    """
-    Add the cog we have made to our bot.
-
-    This function is necessary for every cog file, multiple classes in the
-    same file all need adding and each file must have their own setup function.
-    """
     await bot.add_cog(Tables(bot))
